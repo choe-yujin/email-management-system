@@ -2,7 +2,7 @@ package com.metaverse.mail;
 
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.JDBCConnection;
-import com.metaverse.mail.view.impl.MainMenuView;
+import com.metaverse.mail.view.impl.MainMenuViewImpl;
 
 import java.util.Scanner;
 
@@ -38,8 +38,8 @@ public class Application {
             ConsoleHelper consoleHelper = new ConsoleHelper(scanner);
 
             // 메인 메뉴 화면 생성 및 표시
-            MainMenuView mainMenuView = new MainMenuView(scanner);
-            mainMenuView.display();
+            MainMenuViewImpl mainMenuViewImpl = new MainMenuViewImpl(scanner);
+            mainMenuViewImpl.display();
 
             // 종료 시 자원 정리
             scanner.close();
