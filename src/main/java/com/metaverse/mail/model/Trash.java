@@ -6,11 +6,10 @@ import java.time.format.DateTimeFormatter;
 /**
  * 휴지통에 있는 이메일 정보를 나타내는 모델 클래스
  * 
- * <p>이 클래스는 데이터베이스 TRASH 테이블의 레코드를 자바 객체로 표현합니다.
- * 삭제된 이메일의 유지 기간 및 복구 상태 등을 관리합니다.</p>
+ * 이 클래스는 데이터베이스 TRASH 테이블의 레코드를 자바 객체로 표현합니다.
+ * 삭제된 이메일의 유지 기간 및 복구 상태 등을 관리합니다.
  * 
- * <p>관련 테이블 구조:</p>
- * <pre>
+ * 관련 테이블 구조:
  * CREATE TABLE TRASH (
  *     trash_idx       INTEGER PRIMARY KEY AUTO_INCREMENT COMMENT '휴지통 고유의 idx 값',
  *     link_id         INTEGER                                             NOT NULL COMMENT '링크드 아이디(FK)',
@@ -20,9 +19,8 @@ import java.time.format.DateTimeFormatter;
  *     FOREIGN KEY (link_id) REFERENCES EMAIL_LINK (link_idx) ON DELETE CASCADE,
  *     CONSTRAINT chk_trash_restored CHECK (is_restored IN ('Y', 'N'))
  * );
- * </pre>
  * 
- * @author 이메일 관리 시스템 팀
+ * @author 유진
  * @version 1.0
  */
 public class Trash {
@@ -156,7 +154,7 @@ public class Trash {
     /**
      * 삭제 일시를 포맷팅하여 문자열로 반환
      * 
-     * <p>포맷 형식: "yyyy-MM-dd HH:mm"</p>
+     * 포맷 형식: "yyyy-MM-dd HH:mm"
      * 
      * @return 포맷팅된 삭제 일시 문자열, 삭제 일시가 null인 경우 빈 문자열
      */
@@ -170,7 +168,7 @@ public class Trash {
     /**
      * 만료 일시를 포맷팅하여 문자열로 반환
      * 
-     * <p>포맷 형식: "yyyy-MM-dd HH:mm"</p>
+     * 포맷 형식: "yyyy-MM-dd HH:mm"
      * 
      * @return 포맷팅된 만료 일시 문자열, 만료 일시가 null인 경우 빈 문자열
      */
@@ -184,7 +182,7 @@ public class Trash {
     /**
      * Trash 객체의 문자열 표현을 반환합니다.
      * 
-     * <p>휴지통 항목의 기본 정보를 포함합니다.</p>
+     * 휴지통 항목의 기본 정보를 포함합니다.
      * 
      * @return Trash 객체의 문자열 표현
      */

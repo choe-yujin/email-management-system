@@ -12,18 +12,16 @@ import java.util.Properties;
 /**
  * 데이터베이스 연결을 관리하는 유틸리티 클래스
  * 
- * <p>이 클래스는 HikariCP 커넥션 풀을 사용하여 데이터베이스 연결을 효율적으로 관리합니다.</p>
- * <p>주요 기능:</p>
- * <ul>
- *   <li>데이터베이스 연결 풀 초기화 및 관리</li>
- *   <li>애플리케이션에서 필요한 DB 연결 제공</li>
- *   <li>연결 풀 상태 모니터링 및 리소스 정리</li>
- * </ul>
+ * 이 클래스는 HikariCP 커넥션 풀을 사용하여 데이터베이스 연결을 효율적으로 관리합니다.
+ * 주요 기능:
+ *   데이터베이스 연결 풀 초기화 및 관리
+ *   애플리케이션에서 필요한 DB 연결 제공
+ *   연결 풀 상태 모니터링 및 리소스 정리
  * 
- * <p>이 클래스는 싱글톤 패턴과 유사하게 정적 멤버와 메서드로 구현되어 있으며,
- * 애플리케이션 전체에서 하나의 연결 풀을 공유합니다.</p>
+ * 이 클래스는 싱글톤 패턴과 유사하게 정적 멤버와 메서드로 구현되어 있으며,
+ * 애플리케이션 전체에서 하나의 연결 풀을 공유합니다.
  * 
- * @author 이메일 관리 시스템 팀
+ * @author 유진
  * @version 1.0
  */
 public class JDBCConnection {
@@ -33,30 +31,19 @@ public class JDBCConnection {
     /**
      * 정적 초기화 블록
      * 
-     * <p>클래스가 로드될 때 한 번만 실행되어 데이터베이스 연결 풀을 초기화합니다.</p>
-     * <p>다음 단계로 실행됩니다:</p>
-     * <ol>
-     *   <li>config.properties 파일에서 DB 연결 정보 로드</li>
-     *   <li>HikariCP 설정 구성</li>
-     *   <li>커넥션 풀 생성</li>
-     * </ol>
+     * 클래스가 로드될 때 한 번만 실행되어 데이터베이스 연결 풀을 초기화합니다.
+     * 다음 단계로 실행됩니다:
+     *   config.properties 파일에서 DB 연결 정보 로드
+     *   HikariCP 설정 구성
+     *   커넥션 풀 생성
      * 
-     * <p>초기화 중 오류가 발생하면 RuntimeException으로 감싸서 던집니다.</p>
+     * 초기화 중 오류가 발생하면 RuntimeException으로 감싸서 던집니다.
      */
     static {
         try {
-            /*
-             * Properties 객체를 사용하여 키-값 쌍으로 설정 정보를 관리합니다.
-             * 주로 설정 정보나 구성 데이터를 관리하는데 유용합니다.
-             */
+
             Properties props = new Properties();
-            
-            /*
-             * properties.load() 메서드로 외부 파일을 읽어옵니다.
-             * JDBCConnection.class.getClassLoader()를 통해 클래스를 메모리에 로드하는 
-             * 클래스 로더에 접근하여 설정 파일을 찾습니다.
-             * getResourceAsStream("config.properties")는 해당 파일을 스트림으로 가져옵니다.
-             */
+
             props.load(JDBCConnection.class.getClassLoader().getResourceAsStream("config.properties"));
             
             /* DB 접속을 위한 설정 정보를 구성합니다 */
@@ -94,14 +81,14 @@ public class JDBCConnection {
     /**
      * 데이터베이스 연결 객체를 제공합니다.
      * 
-     * <p>커넥션 풀에서 사용 가능한 연결을 가져옵니다. 이 연결은 사용 후 반드시 close()해야 합니다.
-     * 직접 close()를 호출하면 연결이 끊어지지 않고 풀로 반환됩니다.</p>
+     * 커넥션 풀에서 사용 가능한 연결을 가져옵니다. 이 연결은 사용 후 반드시 close()해야 합니다.
+     * 직접 close()를 호출하면 연결이 끊어지지 않고 풀로 반환됩니다.
      * 
-     * <p>DB 세션에 대한 참고 사항:</p>
-     * <p>DB에는 세션이라는 개념이 존재하며, DB에 연결한 시점에 생성됩니다.
+     * DB 세션에 대한 참고 사항:
+     * DB에는 세션이라는 개념이 존재하며, DB에 연결한 시점에 생성됩니다.
      * 세션을 통해 트랜잭션, 임시 데이터, 캐싱 등의 데이터를 관리합니다.
      * HikariCP는 DB 커넥션 객체를 재사용하지만, JDBC 내부에서 연결을 재사용할 때마다
-     * 새로운 세션을 생성하므로 세션 중복 문제는 발생하지 않습니다.</p>
+     * 새로운 세션을 생성하므로 세션 중복 문제는 발생하지 않습니다.
      * 
      * @return 데이터베이스 연결 객체
      * @throws SQLException 연결 획득 중 데이터베이스 오류 발생 시
@@ -113,8 +100,8 @@ public class JDBCConnection {
     /**
      * 전체 커넥션 풀을 종료합니다.
      * 
-     * <p>애플리케이션 종료 시 호출하여 모든 커넥션을 정리합니다.
-     * 이 메서드 호출 후에는 더 이상 getConnection()으로 연결을 획득할 수 없습니다.</p>
+     * 애플리케이션 종료 시 호출하여 모든 커넥션을 정리합니다.
+     * 이 메서드 호출 후에는 더 이상 getConnection()으로 연결을 획득할 수 없습니다.
      */
     public static void close() {
         if (dataSource != null) {
@@ -125,14 +112,12 @@ public class JDBCConnection {
     /**
      * 커넥션 풀의 현재 상태를 콘솔에 출력합니다.
      * 
-     * <p>디버깅과 모니터링을 위한 유틸리티 메서드입니다.
-     * 다음 정보를 표시합니다:</p>
-     * <ul>
-     *   <li>총 커넥션 수</li>
-     *   <li>활성(사용 중인) 커넥션 수</li>
-     *   <li>유휴(사용 가능한) 커넥션 수</li>
-     *   <li>대기 중인 커넥션 요청 수</li>
-     * </ul>
+     * 디버깅과 모니터링을 위한 유틸리티 메서드입니다.
+     * 다음 정보를 표시합니다:
+     *   총 커넥션 수
+     *   활성(사용 중인) 커넥션 수
+     *   유휴(사용 가능한) 커넥션 수
+     *   대기 중인 커넥션 요청 수
      */
     public static void printConnectionPoolStatus() {
         HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();

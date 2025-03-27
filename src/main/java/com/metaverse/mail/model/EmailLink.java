@@ -3,11 +3,10 @@ package com.metaverse.mail.model;
 /**
  * 이메일과 수신자 간의 연결 정보를 나타내는 모델 클래스
  * 
- * <p>이 클래스는 데이터베이스 EMAIL_LINK 테이블의 레코드를 자바 객체로 표현합니다.
- * 각 수신자에 대한 이메일 읽음 여부와 삭제 여부 등의 상태를 추적합니다.</p>
+ * 이 클래스는 데이터베이스 EMAIL_LINK 테이블의 레코드를 자바 객체로 표현합니다.
+ * 각 수신자에 대한 이메일 읽음 여부와 삭제 여부 등의 상태를 추적합니다.
  * 
- * <p>관련 테이블 구조:</p>
- * <pre>
+ * 관련 테이블 구조:
  * CREATE TABLE EMAIL_LINK (
  *     link_idx    INTEGER PRIMARY KEY AUTO_INCREMENT COMMENT '이메일 링크드 고유의 idx 값',
  *     receiver_id INTEGER             NOT NULL COMMENT '수신자ID',
@@ -19,9 +18,8 @@ package com.metaverse.mail.model;
  *     CONSTRAINT chk_email_link_read CHECK (is_readed IN ('Y', 'N')),
  *     CONSTRAINT chk_email_link_deleted CHECK (is_deleted IN ('Y', 'N'))
  * );
- * </pre>
  * 
- * @author 이메일 관리 시스템 팀
+ * @author 유진
  * @version 1.0
  */
 public class EmailLink {
@@ -155,7 +153,7 @@ public class EmailLink {
     /**
      * EmailLink 객체의 문자열 표현을 반환합니다.
      * 
-     * <p>이메일 링크의 기본 정보를 포함합니다.</p>
+     * 이메일 링크의 기본 정보를 포함합니다.
      * 
      * @return EmailLink 객체의 문자열 표현
      */

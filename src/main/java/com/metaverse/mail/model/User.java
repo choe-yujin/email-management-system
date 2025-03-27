@@ -6,11 +6,10 @@ import java.time.format.DateTimeFormatter;
 /**
  * 사용자 정보를 나타내는 모델 클래스
  * 
- * <p>이 클래스는 데이터베이스 USER 테이블의 레코드를 자바 객체로 표현합니다.
- * 사용자의 기본 정보 및 계정 상태를 포함합니다.</p>
+ * 이 클래스는 데이터베이스 USER 테이블의 레코드를 자바 객체로 표현합니다.
+ * 사용자의 기본 정보 및 계정 상태를 포함합니다.
  * 
- * <p>관련 테이블 구조:</p>
- * <pre>
+ * 관련 테이블 구조:
  * CREATE TABLE USER (
  *     idx        INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL COMMENT '회원 고유의 idx값',
  *     email_id   VARCHAR(100)           NOT NULL UNIQUE COMMENT '회원 이메일 아이디',
@@ -22,9 +21,8 @@ import java.time.format.DateTimeFormatter;
  *     deleted_at DATETIME COMMENT '회원 삭제일',
  *     CONSTRAINT chk_user_status CHECK (status IN ('A', 'D'))
  * );
- * </pre>
  * 
- * @author 이메일 관리 시스템 팀
+ * @author 유진
  * @version 1.0
  */
 public class User {
@@ -221,7 +219,7 @@ public class User {
     /**
      * 사용자 객체의 문자열 표현을 반환합니다.
      * 
-     * <p>사용자의 기본 정보를 포함합니다.</p>
+     * 사용자의 기본 정보를 포함합니다.
      * 
      * @return 사용자 객체의 문자열 표현
      */

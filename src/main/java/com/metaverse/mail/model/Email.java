@@ -6,11 +6,10 @@ import java.time.format.DateTimeFormatter;
 /**
  * 이메일 정보를 나타내는 모델 클래스
  * 
- * <p>이 클래스는 데이터베이스 EMAIL 테이블의 레코드를 자바 객체로 표현합니다.
- * 이메일의 기본 정보(발신자, 제목, 내용, 상태 등)를 포함합니다.</p>
+ * 이 클래스는 데이터베이스 EMAIL 테이블의 레코드를 자바 객체로 표현합니다.
+ * 이메일의 기본 정보(발신자, 제목, 내용, 상태 등)를 포함합니다.
  * 
- * <p>관련 테이블 구조:</p>
- * <pre>
+ * 관련 테이블 구조:
  * CREATE TABLE EMAIL (
  *     email_idx  INTEGER PRIMARY KEY AUTO_INCREMENT COMMENT '이메일 고유의 idx 값',
  *     sender_id  INTEGER               NOT NULL COMMENT '발신자 ID',
@@ -21,9 +20,8 @@ import java.time.format.DateTimeFormatter;
  *     FOREIGN KEY (sender_id) REFERENCES USER (idx) ON DELETE CASCADE,
  *     CONSTRAINT chk_email_status CHECK (status IN ('Y', 'N'))
  * );
- * </pre>
  * 
- * @author 이메일 관리 시스템 팀
+ * @author 유진
  * @version 1.0
  */
 public class Email {
@@ -178,7 +176,7 @@ public class Email {
     /**
      * 이메일 생성 일시를 포맷팅하여 문자열로 반환
      * 
-     * <p>포맷 형식: "yyyy-MM-dd HH:mm"</p>
+     * 포맷 형식: "yyyy-MM-dd HH:mm"
      * 
      * @return 포맷팅된 생성 일시 문자열, 생성 일시가 null인 경우 빈 문자열
      */
@@ -192,7 +190,7 @@ public class Email {
     /**
      * 이메일 객체의 문자열 표현을 반환합니다.
      * 
-     * <p>이메일의 기본 정보를 포함합니다.</p>
+     * 이메일의 기본 정보를 포함합니다.
      * 
      * @return 이메일 객체의 문자열 표현
      */

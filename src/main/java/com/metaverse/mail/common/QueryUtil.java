@@ -13,18 +13,16 @@ import java.util.Map;
 /**
  * XML 파일에서 SQL 쿼리를 로드하고 관리하는 유틸리티 클래스
  * 
- * <p>이 클래스는 SQL 쿼리를 코드에서 분리하여 외부 XML 파일(queries.xml)에서 관리합니다.
- * 애플리케이션 시작 시 모든 쿼리를 로드하여 메모리에 캐싱하며, 필요할 때 ID를 통해 접근할 수 있습니다.</p>
+ * 이 클래스는 SQL 쿼리를 코드에서 분리하여 외부 XML 파일(queries.xml)에서 관리합니다.
+ * 애플리케이션 시작 시 모든 쿼리를 로드하여 메모리에 캐싱하며, 필요할 때 ID를 통해 접근할 수 있습니다.
  * 
- * <p>이와 같은 방식의 장점:</p>
- * <ul>
- *   <li>SQL 쿼리와 Java 코드 분리로 유지보수성 향상</li>
- *   <li>쿼리 변경 시 코드 재컴파일 불필요</li>
- *   <li>쿼리 재사용 용이</li>
- *   <li>중앙 집중식 쿼리 관리</li>
- * </ul>
+ * 이와 같은 방식의 장점:
+ *   SQL 쿼리와 Java 코드 분리로 유지보수성 향상
+ *   쿼리 변경 시 코드 재컴파일 불필요
+ *   쿼리 재사용 용이
+ *   중앙 집중식 쿼리 관리
  * 
- * @author 이메일 관리 시스템 팀
+ * @author 유진
  * @version 1.0
  */
 public class QueryUtil {
@@ -34,7 +32,7 @@ public class QueryUtil {
     /**
      * 정적 초기화 블록
      * 
-     * <p>클래스가 로드될 때 한 번만 실행되어 XML 파일에서 쿼리를 로드합니다.</p>
+     * 클래스가 로드될 때 한 번만 실행되어 XML 파일에서 쿼리를 로드합니다.
      */
     static {
         loadQueries();
@@ -43,16 +41,14 @@ public class QueryUtil {
     /**
      * XML 파일에서 SQL 쿼리를 로드하여 메모리(HashMap)에 저장합니다.
      * 
-     * <p>이 메서드는 다음 단계로 실행됩니다:</p>
-     * <ol>
-     *   <li>리소스 폴더에서 queries.xml 파일을 InputStream으로 로드</li>
-     *   <li>XML 파싱 및 Document 객체 생성</li>
-     *   <li>모든 'query' 태그 요소 검색</li>
-     *   <li>각 query 요소에서 id 속성과 SQL 텍스트 추출</li>
-     *   <li>추출한 정보를 HashMap에 저장</li>
-     * </ol>
+     * 이 메서드는 다음 단계로 실행됩니다:
+     *   리소스 폴더에서 queries.xml 파일을 InputStream으로 로드
+     *   XML 파싱 및 Document 객체 생성
+     *   모든 'query' 태그 요소 검색
+     *   각 query 요소에서 id 속성과 SQL 텍스트 추출
+     *   추출한 정보를 HashMap에 저장
      * 
-     * <p>오류 발생 시 RuntimeException으로 예외를 감싸서 던집니다.</p>
+     * 오류 발생 시 RuntimeException으로 예외를 감싸서 던집니다.
      * 
      * @throws RuntimeException XML 파일을 찾을 수 없거나 파싱 중 오류 발생 시
      */
@@ -97,21 +93,17 @@ public class QueryUtil {
     /**
      * 특정 ID에 해당하는 SQL 쿼리를 반환합니다.
      * 
-     * <p>queries.xml 파일에 정의된 쿼리 ID를 통해 해당 SQL 문자열을 조회합니다.</p>
+     * queries.xml 파일에 정의된 쿼리 ID를 통해 해당 SQL 문자열을 조회합니다.
      * 
-     * <p>XML 파일 예시:</p>
-     * <pre>
-     * &lt;query id="findUserById"&gt;
+     * XML 파일 예시:
+     * <query id="findUserById">
      *     SELECT * FROM USER WHERE idx = ?
-     * &lt;/query&gt;
-     * </pre>
+     * </query>
      * 
-     * <p>사용 예시:</p>
-     * <pre>
+     * 사용 예시:
      * String sql = QueryUtil.getQuery("findUserById");
      * PreparedStatement pstmt = conn.prepareStatement(sql);
      * pstmt.setInt(1, userId);
-     * </pre>
      * 
      * @param id XML 파일에 정의된 쿼리 ID
      * @return ID에 해당하는 SQL 쿼리 문자열, 찾지 못한 경우 null
