@@ -3,7 +3,6 @@ package com.metaverse.mail.view.impl;
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.Session;
 import com.metaverse.mail.view.interfaces.MainMenuView;
-
 import java.util.Scanner;
 
 /**
@@ -22,7 +21,7 @@ import java.util.Scanner;
  * @author 유진
  * @version 1.0
  */
-public class MainMenuView implements MainMenuView {
+public class MainMenuViewImpl implements MainMenuView {
     /** 사용자 입력을 처리하는 Scanner 객체 */
     private Scanner scanner;
     
@@ -39,7 +38,7 @@ public class MainMenuView implements MainMenuView {
      * 
      * @param scanner 사용자 입력을 읽기 위한 Scanner 객체
      */
-    public MainMenuView(Scanner scanner) {
+    public MainMenuViewImpl(Scanner scanner) {
         this.scanner = scanner;
         this.consoleHelper = new ConsoleHelper(scanner);
         this.session = Session.getInstance();
