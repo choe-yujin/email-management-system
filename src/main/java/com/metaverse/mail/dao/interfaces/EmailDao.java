@@ -22,9 +22,6 @@ public interface EmailDao {
      * 
      * 데이터베이스에 새로운 이메일을 저장합니다.
      * 이메일 작성 및 전송 시 호출됩니다.
-     * 
-     * 예상 SQL:
-     * INSERT INTO EMAIL (sender_id, title, body, status) VALUES (?, ?, ?, 'Y')
      *
      * @param email 이메일 객체
      * @return 생성된 이메일 ID, 실패 시 -1
@@ -36,9 +33,6 @@ public interface EmailDao {
      * 
      * 데이터베이스에서 지정된 ID에 해당하는 이메일 정보를 검색합니다.
      * 이메일 상세 보기 시 호출됩니다.
-     * 
-     * 예상 SQL:
-     * SELECT * FROM EMAIL WHERE email_idx = ?
      *
      * @param emailId 이메일 ID
      * @return 이메일 객체, 없으면 null
@@ -50,9 +44,6 @@ public interface EmailDao {
      * 
      * 특정 사용자가 보낸 이메일 목록을 데이터베이스에서 조회합니다.
      * 보낸 메일함 기능 구현 시 호출됩니다.
-     * 
-     * 예상 SQL:
-     * SELECT * FROM EMAIL WHERE sender_id = ? ORDER BY created_at DESC
      *
      * @param senderId 발신자 ID
      * @return 이메일 목록
@@ -64,11 +55,6 @@ public interface EmailDao {
      * 
      * 제목이나 내용에 특정 키워드가 포함된 이메일을 검색합니다.
      * 이메일 검색 기능 구현 시 호출됩니다.
-     * 
-     * 예상 SQL:
-     * SELECT e.* FROM EMAIL e 
-     * WHERE (e.title LIKE ? OR e.body LIKE ?) 
-     * AND (e.sender_id = ? OR e.email_idx IN (SELECT email_idx FROM EMAIL_LINK WHERE receiver_id = ?))
      *
      * @param keyword 검색 키워드
      * @param userId 사용자 ID (발신/수신 이메일 모두 검색)
@@ -81,9 +67,6 @@ public interface EmailDao {
      * 
      * 데이터베이스에서 이메일의 상태를 변경하여 삭제 처리합니다.
      * 실제로 데이터베이스에서 레코드를 삭제하지 않고 상태만 변경합니다.
-     * 
-     * 예상 SQL:
-     * UPDATE EMAIL SET status = 'N' WHERE email_idx = ?
      *
      * @param emailId 이메일 ID
      * @return 성공 여부
