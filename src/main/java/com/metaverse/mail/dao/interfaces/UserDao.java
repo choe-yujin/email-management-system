@@ -3,40 +3,90 @@ package com.metaverse.mail.dao.interfaces;
 import com.metaverse.mail.model.User;
 import java.util.List;
 
+/**
+ * 사용자 데이터 액세스를 위한 인터페이스
+ * 
+ * <p>이 인터페이스는 사용자 정보에 대한 데이터베이스 CRUD(Create, Read, Update, Delete) 
+ * 연산을 정의합니다. 각 구현체는 이 인터페이스를 구현하여 데이터베이스와의 실제 통신을 담당합니다.</p>
+ * 
+ * <p>데이터 액세스 계층의 일부로, 서비스 계층과 데이터베이스 간의 중간 역할을 합니다.</p>
+ * 
+ * <p>담당 개발자: 우선(개발자 A)</p>
+ * 
+ * @author 이메일 관리 시스템 팀
+ * @version 1.0
+ */
 public interface UserDao {
     /**
      * 사용자 ID로 사용자 정보 조회
-     * @param userId 사용자 ID
-     * @return 사용자 정보, 없으면 null
+     * 
+     * <p>데이터베이스에서 지정된 ID에 해당하는 사용자 정보를 검색합니다.</p>
+     * 
+     * <p>예상 SQL:</p>
+     * <pre>SELECT * FROM USER WHERE idx = ?</pre>
+     *
+     * @param userId 조회할 사용자 ID
+     * @return 조회된 사용자 객체, 없으면 null
      */
     User findById(int userId);
 
     /**
-     * 이메일로 사용자 정보 조회
-     * @param emailId 이메일 ID
-     * @return 사용자 정보, 없으면 null
+     * 이메일 주소로 사용자 정보 조회
+     * 
+     * <p>데이터베이스에서 지정된 이메일 주소에 해당하는 사용자 정보를 검색합니다.
+     * 주로 로그인 시 사용자 인증에 활용됩니다.</p>
+     * 
+     * <p>예상 SQL:</p>
+     * <pre>SELECT * FROM USER WHERE email_id = ?</pre>
+     *
+     * @param emailId 조회할 이메일 주소
+     * @return 조회된 사용자 객체, 없으면 null
      */
     User findByEmailId(String emailId);
 
     /**
      * 새 사용자 추가
-     * @param user 사용자 객체
-     * @return 성공 여부
+     * 
+     * <p>데이터베이스에 새로운 사용자 정보를 추가합니다.
+     * 회원가입 처리 시 호출됩니다.</p>
+     * 
+     * <p>예상 SQL:</p>
+     * <pre>INSERT INTO USER (email_id, email_pwd, nickname, status) VALUES (?, ?, ?, 'A')</pre>
+     *
+     * @param user 추가할 사용자 객체
+     * @return 추가 성공 여부(true: 성공, false: 실패)
      */
     boolean insert(User user);
 
     /**
      * 사용자 정보 수정
-     * @param user 수정할 사용자 정보
-     * @return 성공 여부
+     * 
+     * <p>데이터베이스에 저장된 사용자 정보를 업데이트합니다.
+     * 프로필 수정이나 비밀번호 변경 시 호출됩니다.</p>
+     * 
+     * <p>예상 SQL:</p>
+     * <pre>UPDATE USER SET nickname = ?, email_pwd = ?, updated_at = NOW() WHERE idx = ?</pre>
+     *
+     * @param user 수정할 사용자 정보가 담긴 객체
+     * @return 수정 성공 여부(true: 성공, false: 실패)
      */
     boolean update(User user);
 
     /**
-     * 사용자 상태 변경 (활성/비활성)
-     * @param userId 사용자 ID
-     * @param status 변경할 상태 ('A': 활성, 'D': 삭제)
-     * @return 성공 여부
+     * 사용자 상태 변경
+     * 
+     * <p>데이터베이스에 저장된 사용자의 상태를 변경합니다.
+     * 회원 탈퇴나 계정 재활성화 시 호출됩니다.</p>
+     * 
+     * <p>예상 SQL ('A'로 변경 시):</p>
+     * <pre>UPDATE USER SET status = 'A', updated_at = NOW() WHERE idx = ?</pre>
+     * 
+     * <p>예상 SQL ('D'로 변경 시):</p>
+     * <pre>UPDATE USER SET status = 'D', updated_at = NOW(), deleted_at = NOW() WHERE idx = ?</pre>
+     *
+     * @param userId 상태를 변경할 사용자 ID
+     * @param status 변경할 상태 ('A': 활성, 'D': 탈퇴)
+     * @return 상태 변경 성공 여부(true: 성공, false: 실패)
      */
     boolean updateStatus(int userId, char status);
 }
