@@ -9,87 +9,137 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-/*
- * config 패키지
- * config 패키지는 주로 설정 정보와 같은 소스 코드를 저장하는 패키지이다.
- * */
+/**
+ * 데이터베이스 연결을 관리하는 유틸리티 클래스
+ * 
+ * <p>이 클래스는 HikariCP 커넥션 풀을 사용하여 데이터베이스 연결을 효율적으로 관리합니다.</p>
+ * <p>주요 기능:</p>
+ * <ul>
+ *   <li>데이터베이스 연결 풀 초기화 및 관리</li>
+ *   <li>애플리케이션에서 필요한 DB 연결 제공</li>
+ *   <li>연결 풀 상태 모니터링 및 리소스 정리</li>
+ * </ul>
+ * 
+ * <p>이 클래스는 싱글톤 패턴과 유사하게 정적 멤버와 메서드로 구현되어 있으며,
+ * 애플리케이션 전체에서 하나의 연결 풀을 공유합니다.</p>
+ * 
+ * @author 이메일 관리 시스템 팀
+ * @version 1.0
+ */
 public class JDBCConnection {
+    /** HikariCP 데이터 소스 (커넥션 풀) */
     private static final HikariDataSource dataSource;
 
-    // 메모리에 올라가기 전에 static 블록을 정의. 메모리에 올라가면 변경 불가.
+    /**
+     * 정적 초기화 블록
+     * 
+     * <p>클래스가 로드될 때 한 번만 실행되어 데이터베이스 연결 풀을 초기화합니다.</p>
+     * <p>다음 단계로 실행됩니다:</p>
+     * <ol>
+     *   <li>config.properties 파일에서 DB 연결 정보 로드</li>
+     *   <li>HikariCP 설정 구성</li>
+     *   <li>커넥션 풀 생성</li>
+     * </ol>
+     * 
+     * <p>초기화 중 오류가 발생하면 RuntimeException으로 감싸서 던집니다.</p>
+     */
     static {
         try {
             /*
-             * properties
-             * 키 - 값을 쌍으로 저장하는 방식이다.
-             * 주로 설정 정보나 구성 데이터를 관리하는데 유용하게 사용된다.
-             * */
+             * Properties 객체를 사용하여 키-값 쌍으로 설정 정보를 관리합니다.
+             * 주로 설정 정보나 구성 데이터를 관리하는데 유용합니다.
+             */
             Properties props = new Properties();
+            
             /*
-             * properties.load 외부 파일을 읽어오는 역할을 수행한다.
-             * JDBCConnection.class.GetClassLoader() : 클래스를 메모리에 로드하는 역할을 수행하며 이를 통해 설정 파일에 접근이 가능하다.
-             * getResourceAsStream ("config") : 매개변수로 전달된 파일을 스트림으로 가져오는 역할을 수행한다.
-             * */
+             * properties.load() 메서드로 외부 파일을 읽어옵니다.
+             * JDBCConnection.class.getClassLoader()를 통해 클래스를 메모리에 로드하는 
+             * 클래스 로더에 접근하여 설정 파일을 찾습니다.
+             * getResourceAsStream("config.properties")는 해당 파일을 스트림으로 가져옵니다.
+             */
             props.load(JDBCConnection.class.getClassLoader().getResourceAsStream("config.properties"));
-            // File이 없을 경우의 에러처리를 꼭 해줘야 한다.
-
-            /* DB 접속을 위한 설정 정보 */
+            
+            /* DB 접속을 위한 설정 정보를 구성합니다 */
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(props.getProperty("db.url"));
             config.setUsername(props.getProperty("db.username"));
             config.setPassword(props.getProperty("db.password"));
 
-            // 최대 커넥션
+            // 최대 커넥션 풀 크기 설정 (동시에 사용할 수 있는 최대 DB 연결 수)
             config.setMaximumPoolSize(10);
 
-            // 최소 커넥션
+            // 최소 유휴 커넥션 (사용되지 않는 상태로 풀에 유지할 최소 연결 수)
             config.setMinimumIdle(5);
 
-            // 유휴 상태면 커넥션 닫기, 즉 30초 동안 아무런 요청 없으면 커넥션을 닫기
+            // 유휴 상태의 커넥션이 닫히기까지의 시간 (30초)
+            // 30초 동안 사용되지 않으면 풀에서 제거됩니다
             config.setIdleTimeout(30000);
 
-            config.setMaxLifetime(1800000); // 30분 후 커넥션을 새로 생성한다.
+            // 커넥션의 최대 수명 (30분)
+            // 30분 후에는 사용 중이 아니라면 커넥션을 새로 생성합니다
+            config.setMaxLifetime(1800000);
 
-            config.setConnectionTimeout(2000); // 최대 2초 대기 후 타임 아웃
+            // 커넥션 획득 타임아웃 (2초)
+            // 2초 내에 커넥션을 얻지 못하면 예외 발생
+            config.setConnectionTimeout(2000);
 
+            // 설정 정보로 데이터 소스(커넥션 풀) 생성
             dataSource = new HikariDataSource(config);
         } catch (IOException e){
-            throw new RuntimeException(e);
+            // 초기화 중 오류 발생 시 런타임 예외로 변환하여 던짐
+            throw new RuntimeException("데이터베이스 연결 풀 초기화 중 오류 발생", e);
         }
-        // gradle 파일 실행되고 build가 된다. 그리고 나서 그 안에서 프로그램이 실행된다.
-        // 자바는 프로그램 실행되는 생성주기가, 자바코드를 클래스파일로 바꾸고, jvm이 읽고, os에 명령내리는 방식.
-        // 클래스파일로 변환되는 과정에서 build가 된다. 여기에서 리소스 읽어오게끔 만들어준다.
     }
 
-    // 커넥션 풀에서 연결되어 있는 객체를 꺼내오는 메서드
+    /**
+     * 데이터베이스 연결 객체를 제공합니다.
+     * 
+     * <p>커넥션 풀에서 사용 가능한 연결을 가져옵니다. 이 연결은 사용 후 반드시 close()해야 합니다.
+     * 직접 close()를 호출하면 연결이 끊어지지 않고 풀로 반환됩니다.</p>
+     * 
+     * <p>DB 세션에 대한 참고 사항:</p>
+     * <p>DB에는 세션이라는 개념이 존재하며, DB에 연결한 시점에 생성됩니다.
+     * 세션을 통해 트랜잭션, 임시 데이터, 캐싱 등의 데이터를 관리합니다.
+     * HikariCP는 DB 커넥션 객체를 재사용하지만, JDBC 내부에서 연결을 재사용할 때마다
+     * 새로운 세션을 생성하므로 세션 중복 문제는 발생하지 않습니다.</p>
+     * 
+     * @return 데이터베이스 연결 객체
+     * @throws SQLException 연결 획득 중 데이터베이스 오류 발생 시
+     */
     public static Connection getConnection() throws SQLException {
-        /*
-        DB에는 세션이라는 것이 존재한다.
-        이러한 세션은 DB에 연결한 시점으로 생성되며
-        이를 기점으로 트랜잭션 임시 데이터, 캐싱 등의 데이터를 관리하게 된다.
-
-        여기서 지금 우리가 사용하는 hikari의 경우 DB의 커넥션 객체를 몇개 생성하고
-        다른 사용자에게 빌려주고 반환받고 다시 빌려주는 형식으로 동작된다.
-        이러한 과정에서 세션이 중복되는 문제가 발생할 수 있다고 생각될 수 있으나
-        다시 빌려주는 과정에서 JDBC 내부에서 세션을 새롭게 생성하기 때문에 신경쓰지 않아도 된다.
-        * */
-        return dataSource.getConnection(); //connection pool에서 connection 객체를 꺼내옴
+        return dataSource.getConnection();
     }
 
-    // hikaricp 전체 커넥션 풀을 종료하는 메서드
-    // application -> 전체 종료 -> connection pool 더 이상 사용 불가
+    /**
+     * 전체 커넥션 풀을 종료합니다.
+     * 
+     * <p>애플리케이션 종료 시 호출하여 모든 커넥션을 정리합니다.
+     * 이 메서드 호출 후에는 더 이상 getConnection()으로 연결을 획득할 수 없습니다.</p>
+     */
     public static void close() {
         if (dataSource != null) {
             dataSource.close();
         }
     }
 
+    /**
+     * 커넥션 풀의 현재 상태를 콘솔에 출력합니다.
+     * 
+     * <p>디버깅과 모니터링을 위한 유틸리티 메서드입니다.
+     * 다음 정보를 표시합니다:</p>
+     * <ul>
+     *   <li>총 커넥션 수</li>
+     *   <li>활성(사용 중인) 커넥션 수</li>
+     *   <li>유휴(사용 가능한) 커넥션 수</li>
+     *   <li>대기 중인 커넥션 요청 수</li>
+     * </ul>
+     */
     public static void printConnectionPoolStatus() {
         HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
         System.out.println("[hikariCP 커넥션 풀 상태]");
-        System.out.println("총 커넥션 수) :" + poolMXBean.getTotalConnections());
-        System.out.println("활성 커넥션 수) :" + poolMXBean.getActiveConnections());
-        System.out.println("유휴 커넥션 수) :" + poolMXBean.getIdleConnections());
-        System.out.println("대기 중인 커넥션 요청 수) :" + poolMXBean.getThreadsAwaitingConnection());
+        System.out.println("총 커넥션 수 : " + poolMXBean.getTotalConnections());
+        System.out.println("활성 커넥션 수 : " + poolMXBean.getActiveConnections());
+        System.out.println("유휴 커넥션 수 : " + poolMXBean.getIdleConnections());
+        System.out.println("대기 중인 커넥션 요청 수 : " + poolMXBean.getThreadsAwaitingConnection());
     }
 }
