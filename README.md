@@ -193,3 +193,5 @@ com.metaverse.mail/
 │           └── TrashView.java
 ```
 
+## 개발 가이드
+- [Git 및 GitHub 사용 가이드](./GIT_GUIDE.md)
