@@ -2,7 +2,7 @@ package com.metaverse.mail.view.impl;
 
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.Session;
-import com.metaverse.mail.view.interfaces.MenuView;
+import com.metaverse.mail.view.interfaces.MainMenuView;
 
 import java.util.Scanner;
 
@@ -22,7 +22,7 @@ import java.util.Scanner;
  * @author 유진
  * @version 1.0
  */
-public class MainMenuView implements MenuView {
+public class MainMenuView implements MainMenuView {
     /** 사용자 입력을 처리하는 Scanner 객체 */
     private Scanner scanner;
     
@@ -87,6 +87,28 @@ public class MainMenuView implements MenuView {
     @Override
     public void executeMenu(int choice) {
         // 구현은 팀원들이 작성
+    }
+    
+    /**
+     * 사용자 정보 표시
+     * 
+     * @param username 사용자 이름
+     */
+    @Override
+    public void showUserInfo(String username) {
+        consoleHelper.displayHeader("사용자 정보");
+        System.out.println("현재 로그인된 사용자: " + username);
+        consoleHelper.displayDivider();
+    }
+    
+    /**
+     * 시스템 알림 표시
+     * 
+     * @param message 알림 메시지
+     */
+    @Override
+    public void showNotification(String message) {
+        System.out.println("📢 알림: " + message);
     }
 
     /**
