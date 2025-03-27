@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queries>
+    <!-- 사용자 관련 쿼리 (개발자 A - 우선님 담당) -->
+    <query id="findUserById">
+        <!-- 사용자 ID로 사용자 정보를 조회하는 쿼리 -->
+        <!-- 매개변수: idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="findUserByEmailId">
+        <!-- 이메일 아이디로 사용자 정보를 조회하는 쿼리 (로그인 시 사용) -->
+        <!-- 매개변수: email_id(String) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="insertUser">
+        <!-- 새 사용자 정보를 DB에 삽입하는 쿼리 (회원가입) -->
+        <!-- 매개변수: email_id(String), email_pwd(String), nickname(String), status(char) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="updateUser">
+        <!-- 사용자 정보를 수정하는 쿼리 (프로필 수정) -->
+        <!-- 매개변수: email_pwd(String), nickname(String), status(char), idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="updateUserStatus">
+        <!-- 사용자 상태를 변경하는 쿼리 (회원 탈퇴 등) -->
+        <!-- 매개변수: status(char), idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <!-- 이메일 관련 쿼리 (개발자 B - 유진님 담당) -->
+    <query id="createEmail">
+        <!-- 새 이메일을 생성하는 쿼리 -->
+        <!-- 매개변수: sender_id(int), title(String), body(String), status(char) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="getEmailById">
+        <!-- 이메일 ID로 이메일 정보를 조회하는 쿼리 -->
+        <!-- 매개변수: email_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="getEmailsBySenderId">
+        <!-- 발신자 ID로 보낸 이메일 목록을 조회하는 쿼리 -->
+        <!-- 매개변수: sender_id(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="searchEmailsByKeyword">
+        <!-- 키워드로 이메일을 검색하는 쿼리 (제목, 내용, 발신자 포함) -->
+        <!-- 매개변수: keyword(String), userId(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <!-- 이메일 링크 관련 쿼리 (개발자 B, C 공동 담당) -->
+    <query id="createEmailLink">
+        <!-- 이메일과 수신자를 연결하는 쿼리 (이메일 발송 시) -->
+        <!-- 매개변수: receiver_id(int), email_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="getLinkById">
+        <!-- 링크 ID로 이메일 링크 정보를 조회하는 쿼리 -->
+        <!-- 매개변수: link_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="getLinksByReceiverId">
+        <!-- 수신자 ID로 받은 이메일 링크 목록을 조회하는 쿼리 -->
+        <!-- 매개변수: receiver_id(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="markAsRead">
+        <!-- 이메일을 읽음 상태로 변경하는 쿼리 -->
+        <!-- 매개변수: link_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="markAsDeleted">
+        <!-- 이메일을 삭제 상태로 변경하는 쿼리 (휴지통으로 이동) -->
+        <!-- 매개변수: link_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="restoreEmailLink">
+        <!-- 삭제된 이메일을 복원하는 쿼리 -->
+        <!-- 매개변수: link_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <!-- 휴지통 관련 쿼리 (개발자 C - 효민님 담당) -->
+    <query id="addToTrash">
+        <!-- 삭제된 이메일을 휴지통에 추가하는 쿼리 -->
+        <!-- 매개변수: link_id(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="getTrashByUserId">
+        <!-- 사용자의 휴지통 이메일 목록을 조회하는 쿼리 -->
+        <!-- 매개변수: userId(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="restoreTrashEmail">
+        <!-- 휴지통에서 이메일을 복원하는 쿼리 -->
+        <!-- 매개변수: trash_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="deleteTrashPermanently">
+        <!-- 휴지통에서 이메일을 영구 삭제하는 쿼리 -->
+        <!-- 매개변수: trash_idx(int) -->
+        <!-- 구현 필요 -->
+    </query>
+
+    <query id="deleteExpiredEmails">
+        <!-- 기간이 만료된 휴지통 이메일을 자동 삭제하는 쿼리 -->
+        <!-- 매개변수: 없음 -->
+        <!-- 구현 필요 -->
+    </query>
+</queries>
