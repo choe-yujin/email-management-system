@@ -11,8 +11,10 @@ import com.metaverse.mail.dao.mock.MockUserDao;
 import com.metaverse.mail.service.impl.mail.EmailServiceImpl;
 import com.metaverse.mail.service.interfaces.EmailService;
 import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
+import com.metaverse.mail.view.impl.mail.InboxViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
 import com.metaverse.mail.view.interfaces.mail.ComposeView;
+import com.metaverse.mail.view.interfaces.mail.InboxView;
 
 import java.util.Scanner;
 
@@ -155,8 +157,9 @@ public class MainMenuViewImpl implements MainMenuView {
                 composeView.showComposeForm();
                 break;
             case 2:
-                // 받은 메일함 (팀원 B가 구현)
-                System.out.println("[스켈톤] 받은 메일함 뷰는 팀원 B가 구현할 예정입니다.");
+                // 받은 메일함 - 유진 구현
+                InboxView inboxView = createInboxView();
+                inboxView.showInbox();
                 break;
             case 3:
                 // 보낸 메일함 (팀원 C가 구현)
@@ -200,5 +203,18 @@ public class MainMenuViewImpl implements MainMenuView {
 
         // View 객체 생성 및 반환
         return new ComposeViewImpl(scanner, emailService);
+    }
+
+    private InboxView createInboxView() {
+        // DAO 객체 생성 - 실제 구현체 대신 Mock 사용
+        EmailDao emailDao = new EmailDaoImpl(); // 자신이 구현한 실제 DAO
+        EmailLinkDao emailLinkDao = new MockEmailLinkDao(); // Mock DAO
+        UserDao userDao = new MockUserDao(); // Mock DAO
+
+        // Service 객체 생성
+        EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
+
+        // View 객체 생성 및 반환
+        return new InboxViewImpl(scanner, emailService);
     }
 }
