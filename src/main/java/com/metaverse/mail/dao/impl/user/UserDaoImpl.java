@@ -118,7 +118,7 @@ public class UserDaoImpl implements UserDao {
         String query = QueryUtil.getQuery("updateUserStatus"); // XML에서 쿼리 가져오기
 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setString(1, String.valueOf(status));  // 상태 ('A' 또는 'D') 설정
+            pstmt.setString(1, String.valueOf(status));  // 상태 설정
             pstmt.setInt(2, userId);  // 사용자 ID 설정
             pstmt.executeUpdate();  // 데이터베이스에서 사용자 상태 변경
             return true;  // 성공적으로 상태 변경됨
