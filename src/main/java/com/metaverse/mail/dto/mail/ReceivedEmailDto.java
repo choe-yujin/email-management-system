@@ -42,7 +42,15 @@ public class ReceivedEmailDto {
     /**
      * 기본 생성자
      */
-    public ReceivedEmailDto() {}
+    public ReceivedEmailDto(int emailId, String senderName, String senderEmail, String title, String body, boolean isRead, LocalDateTime sentDate) {
+        this.emailId = emailId;
+        this.senderName = senderName;
+        this.senderEmail = senderEmail;
+        this.title = title;
+        this.body = body;
+        this.isRead = isRead;
+        this.sentDate = sentDate;
+    }
 
     /**
      * 이메일 ID 반환
