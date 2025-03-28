@@ -2,7 +2,18 @@ package com.metaverse.mail.view.impl;
 
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.Session;
+import com.metaverse.mail.dao.impl.mail.EmailDaoImpl;
+import com.metaverse.mail.dao.interfaces.EmailDao;
+import com.metaverse.mail.dao.interfaces.EmailLinkDao;
+import com.metaverse.mail.dao.interfaces.UserDao;
+import com.metaverse.mail.dao.mock.MockEmailLinkDao;
+import com.metaverse.mail.dao.mock.MockUserDao;
+import com.metaverse.mail.service.impl.mail.EmailServiceImpl;
+import com.metaverse.mail.service.interfaces.EmailService;
+import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
+import com.metaverse.mail.view.interfaces.mail.ComposeView;
+
 import java.util.Scanner;
 
 /**
@@ -60,33 +71,6 @@ public class MainMenuViewImpl implements MainMenuView {
             }
         }
     }
-
-    /**
-     * 사용자의 메뉴 선택을 받는 메서드
-     * 
-     * 이 구현체에서는 직접 사용되지 않고, showLoginMenu()와 showMainMenu() 메서드에서
-     * ConsoleHelper를 통해 사용자 입력을 직접 처리합니다.
-     * 
-     * @return 선택한 메뉴 번호 (이 구현에서는 항상 0을 반환)
-     */
-    @Override
-    public int getMenuChoice() {
-        // 구현은 팀원들이 작성
-        return 0;
-    }
-
-    /**
-     * 선택된 메뉴를 실행하는 메서드
-     * 
-     * 이 구현체에서는 직접 사용되지 않고, showLoginMenu()와 showMainMenu() 메서드에서
-     * switch 문을 통해 메뉴 실행을 직접 처리합니다.
-     * 
-     * @param choice 실행할 메뉴 번호
-     */
-    @Override
-    public void executeMenu(int choice) {
-        // 구현은 팀원들이 작성
-    }
     
     /**
      * 사용자 정보 표시
@@ -98,16 +82,6 @@ public class MainMenuViewImpl implements MainMenuView {
         consoleHelper.displayHeader("사용자 정보");
         System.out.println("현재 로그인된 사용자: " + username);
         consoleHelper.displayDivider();
-    }
-    
-    /**
-     * 시스템 알림 표시
-     * 
-     * @param message 알림 메시지
-     */
-    @Override
-    public void showNotification(String message) {
-        System.out.println("📢 알림: " + message);
     }
 
     /**
@@ -161,7 +135,7 @@ public class MainMenuViewImpl implements MainMenuView {
      *   회원 수정 (팀원 A 개발 담당)
      *   로그아웃 (세션 종료 및 로그인 메뉴로 이동)
      */
-    private void showMainMenu() {
+    public void showMainMenu() {
         consoleHelper.displayHeader("📩 메일 관리 시스템 (Main)");
         System.out.println("1. 메일 작성");
         System.out.println("2. 받은 메일함");
@@ -176,8 +150,9 @@ public class MainMenuViewImpl implements MainMenuView {
 
         switch (choice) {
             case 1:
-                // 메일 작성 (팀원 B가 구현)
-                System.out.println("[스켈톤] 메일 작성 뷰는 팀원 B가 구현할 예정입니다.");
+                // 메일 작성 - 유진 구현
+                ComposeView composeView = createComposeView();
+                composeView.showComposeForm();
                 break;
             case 2:
                 // 받은 메일함 (팀원 B가 구현)
@@ -204,5 +179,26 @@ public class MainMenuViewImpl implements MainMenuView {
                 System.out.println("→ 로그아웃 되었습니다.");
                 break;
         }
+    }
+
+    /**
+     * 메일 작성 화면 객체 생성
+     *
+     * 메일 작성에 필요한 DAO, Service 객체들을 생성하고
+     * 이를 주입받은 ComposeView 구현체를 반환합니다.
+     *
+     * @return 메일 작성 화면 객체
+     */
+    private ComposeView createComposeView() {
+        // DAO 객체 생성 - 실제 구현체 대신 Mock 사용
+        EmailDao emailDao = new EmailDaoImpl(); // 자신이 구현한 실제 DAO
+        EmailLinkDao emailLinkDao = new MockEmailLinkDao(); // Mock DAO
+        UserDao userDao = new MockUserDao(); // Mock DAO
+
+        // Service 객체 생성
+        EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
+
+        // View 객체 생성 및 반환
+        return new ComposeViewImpl(scanner, emailService);
     }
 }

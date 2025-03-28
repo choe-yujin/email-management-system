@@ -5,13 +5,13 @@ package com.metaverse.mail.common;
  */
 public class Constants {
     /** 우리 이메일의 도메인 */
-    public static final String EMAIL_DOMAIN = "@metaverse.com";
+    public static final String EMAIL_DOMAIN = "@example.com";
 
     /**
      * 사용자 아이디를 완전한 이메일 주소로 변환
      *
      * @param userId 사용자 아이디
-     * @return 완전한 이메일 주소 (userId@metaverse.com)
+     * @return 완전한 이메일 주소 (userId@example.com)
      */
     public static String toEmail(String userId) {
         return userId + EMAIL_DOMAIN;

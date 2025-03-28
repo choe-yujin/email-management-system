@@ -47,9 +47,8 @@
 
     <!-- 이메일 관련 쿼리 (개발자 B - 유진님 담당) -->
     <query id="createEmail">
-        <!-- 새 이메일을 생성하는 쿼리 -->
-        <!-- 매개변수: sender_id(int), title(String), body(String), status(char) -->
-        <!-- 구현 필요 -->
+        INSERT INTO EMAIL (sender_id, title, body, status)
+        VALUES (?, ?, ?, 'Y')
     </query>
 
     <query id="getEmailById">
