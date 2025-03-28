@@ -52,30 +52,12 @@ public class UserRegisterDto {
     }
 
     /**
-     * 이메일 아이디 설정
-     * 
-     * @param emailId 설정할 이메일 아이디
-     */
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
-    }
-
-    /**
      * 비밀번호 반환
      * 
      * @return 사용자 비밀번호
      */
     public String getPassword() {
         return password;
-    }
-
-    /**
-     * 비밀번호 설정
-     * 
-     * @param password 설정할 비밀번호
-     */
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     /**
@@ -87,12 +69,4 @@ public class UserRegisterDto {
         return nickname;
     }
 
-    /**
-     * 닉네임 설정
-     * 
-     * @param nickname 설정할 닉네임
-     */
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
 }

@@ -45,15 +45,6 @@ public class UserLoginDto {
     }
 
     /**
-     * 이메일 주소 설정
-     * 
-     * @param emailId 설정할 이메일 주소
-     */
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
-    }
-
-    /**
      * 비밀번호 반환
      * 
      * @return 사용자 비밀번호
@@ -62,12 +53,4 @@ public class UserLoginDto {
         return password;
     }
 
-    /**
-     * 비밀번호 설정
-     * 
-     * @param password 설정할 비밀번호
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

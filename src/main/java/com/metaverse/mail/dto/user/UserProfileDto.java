@@ -52,30 +52,12 @@ public class UserProfileDto {
     }
 
     /**
-     * 닉네임 설정
-     * 
-     * @param nickname 설정할 닉네임
-     */
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    /**
      * 현재 비밀번호 반환
      * 
      * @return 현재 비밀번호
      */
     public String getCurrentPassword() {
         return currentPassword;
-    }
-
-    /**
-     * 현재 비밀번호 설정
-     * 
-     * @param currentPassword 설정할 현재 비밀번호
-     */
-    public void setCurrentPassword(String currentPassword) {
-        this.currentPassword = currentPassword;
     }
 
     /**
@@ -87,12 +69,4 @@ public class UserProfileDto {
         return newPassword;
     }
 
-    /**
-     * 새 비밀번호 설정
-     * 
-     * @param newPassword 설정할 새 비밀번호
-     */
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
-    }
 }

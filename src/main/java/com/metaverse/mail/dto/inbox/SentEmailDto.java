@@ -70,30 +70,12 @@ public class SentEmailDto {
     }
 
     /**
-     * 이메일 ID 설정
-     * 
-     * @param emailId 설정할 이메일 ID
-     */
-    public void setEmailId(int emailId) {
-        this.emailId = emailId;
-    }
-
-    /**
      * 수신자 이름 목록 반환
      * 
      * @return 수신자 이름(닉네임) 목록
      */
     public List<String> getReceiverNames() {
         return receiverNames;
-    }
-
-    /**
-     * 수신자 이름 목록 설정
-     * 
-     * @param receiverNames 설정할 수신자 이름 목록
-     */
-    public void setReceiverNames(List<String> receiverNames) {
-        this.receiverNames = receiverNames;
     }
 
     /**
@@ -106,30 +88,12 @@ public class SentEmailDto {
     }
 
     /**
-     * 수신자 이메일 주소 목록 설정
-     * 
-     * @param receiverEmails 설정할 수신자 이메일 주소 목록
-     */
-    public void setReceiverEmails(List<String> receiverEmails) {
-        this.receiverEmails = receiverEmails;
-    }
-
-    /**
      * 이메일 제목 반환
      * 
      * @return 이메일 제목
      */
     public String getTitle() {
         return title;
-    }
-
-    /**
-     * 이메일 제목 설정
-     * 
-     * @param title 설정할 이메일 제목
-     */
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     /**
@@ -142,15 +106,6 @@ public class SentEmailDto {
     }
 
     /**
-     * 이메일 본문 내용 설정
-     * 
-     * @param body 설정할 이메일 본문 내용
-     */
-    public void setBody(String body) {
-        this.body = body;
-    }
-
-    /**
      * 발송 일시 반환
      * 
      * @return 이메일 발송 일시
@@ -159,12 +114,4 @@ public class SentEmailDto {
         return sentDate;
     }
 
-    /**
-     * 발송 일시 설정
-     * 
-     * @param sentDate 설정할 발송 일시
-     */
-    public void setSentDate(LocalDateTime sentDate) {
-        this.sentDate = sentDate;
-    }
 }

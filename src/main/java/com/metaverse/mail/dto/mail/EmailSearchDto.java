@@ -67,15 +67,6 @@ public class EmailSearchDto {
     public int getEmailId() {
         return emailId;
     }
-
-    /**
-     * 이메일 ID 설정
-     * 
-     * @param emailId 설정할 이메일 ID
-     */
-    public void setEmailId(int emailId) {
-        this.emailId = emailId;
-    }
     
     /**
      * 이메일 제목 반환
@@ -84,15 +75,6 @@ public class EmailSearchDto {
      */
     public String getTitle() {
         return title;
-    }
-    
-    /**
-     * 이메일 제목 설정
-     * 
-     * @param title 설정할 이메일 제목
-     */
-    public void setTitle(String title) {
-        this.title = title;
     }
     
     /**
@@ -105,30 +87,12 @@ public class EmailSearchDto {
     }
     
     /**
-     * 상대방 이름 설정
-     * 
-     * @param personName 설정할 상대방 이름
-     */
-    public void setPersonName(String personName) {
-        this.personName = personName;
-    }
-    
-    /**
      * 이메일 유형 반환
      * 
      * @return 이메일 유형 ("수신" 또는 "발신")
      */
     public String getEmailType() {
         return emailType;
-    }
-    
-    /**
-     * 이메일 유형 설정
-     * 
-     * @param emailType 설정할 이메일 유형
-     */
-    public void setEmailType(String emailType) {
-        this.emailType = emailType;
     }
     
     /**
@@ -141,15 +105,6 @@ public class EmailSearchDto {
     }
     
     /**
-     * 읽음 여부 설정
-     * 
-     * @param read 설정할 읽음 여부
-     */
-    public void setRead(boolean read) {
-        this.isRead = read;
-    }
-    
-    /**
      * 발송 일시 반환
      * 
      * @return 이메일 발송 일시
@@ -157,13 +112,5 @@ public class EmailSearchDto {
     public LocalDateTime getSentDate() {
         return sentDate;
     }
-    
-    /**
-     * 발송 일시 설정
-     * 
-     * @param sentDate 설정할 발송 일시
-     */
-    public void setSentDate(LocalDateTime sentDate) {
-        this.sentDate = sentDate;
-    }
+
 }

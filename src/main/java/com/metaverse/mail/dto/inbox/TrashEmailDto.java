@@ -74,30 +74,12 @@ public class TrashEmailDto {
     }
 
     /**
-     * 휴지통 항목 ID 설정
-     * 
-     * @param trashId 설정할 휴지통 항목 ID
-     */
-    public void setTrashId(int trashId) {
-        this.trashId = trashId;
-    }
-
-    /**
      * 이메일 ID 반환
      * 
      * @return 이메일 ID
      */
     public int getEmailId() {
         return emailId;
-    }
-
-    /**
-     * 이메일 ID 설정
-     * 
-     * @param emailId 설정할 이메일 ID
-     */
-    public void setEmailId(int emailId) {
-        this.emailId = emailId;
     }
 
     /**
@@ -110,30 +92,12 @@ public class TrashEmailDto {
     }
 
     /**
-     * 이메일 제목 설정
-     * 
-     * @param title 설정할 이메일 제목
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
      * 상대방 이름 반환
      * 
      * @return 상대방 이름 (발신자 또는 수신자)
      */
     public String getPersonName() {
         return personName;
-    }
-
-    /**
-     * 상대방 이름 설정
-     * 
-     * @param personName 설정할 상대방 이름
-     */
-    public void setPersonName(String personName) {
-        this.personName = personName;
     }
 
     /**
@@ -146,30 +110,12 @@ public class TrashEmailDto {
     }
 
     /**
-     * 이메일 유형 설정
-     * 
-     * @param emailType 설정할 이메일 유형
-     */
-    public void setEmailType(String emailType) {
-        this.emailType = emailType;
-    }
-
-    /**
      * 삭제 일시 반환
      * 
      * @return 이메일 삭제 일시
      */
     public LocalDateTime getDeletedDate() {
         return deletedDate;
-    }
-
-    /**
-     * 삭제 일시 설정
-     * 
-     * @param deletedDate 설정할 삭제 일시
-     */
-    public void setDeletedDate(LocalDateTime deletedDate) {
-        this.deletedDate = deletedDate;
     }
 
     /**
@@ -181,12 +127,4 @@ public class TrashEmailDto {
         return expirationDate;
     }
 
-    /**
-     * 만료 일시 설정
-     * 
-     * @param expirationDate 설정할 만료 일시
-     */
-    public void setExpirationDate(LocalDateTime expirationDate) {
-        this.expirationDate = expirationDate;
-    }
 }

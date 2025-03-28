@@ -54,15 +54,6 @@ public class EmailComposeDto {
     }
 
     /**
-     * 수신자 이메일 주소 목록 설정
-     * 
-     * @param receiverEmails 설정할 수신자 이메일 주소 목록
-     */
-    public void setReceiverEmails(List<String> receiverEmails) {
-        this.receiverEmails = receiverEmails;
-    }
-
-    /**
      * 이메일 제목 반환
      * 
      * @return 이메일 제목
@@ -71,14 +62,6 @@ public class EmailComposeDto {
         return title;
     }
 
-    /**
-     * 이메일 제목 설정
-     * 
-     * @param title 설정할 이메일 제목
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     /**
      * 이메일 본문 내용 반환
@@ -89,12 +72,4 @@ public class EmailComposeDto {
         return body;
     }
 
-    /**
-     * 이메일 본문 내용 설정
-     * 
-     * @param body 설정할 이메일 본문 내용
-     */
-    public void setBody(String body) {
-        this.body = body;
-    }
 }
