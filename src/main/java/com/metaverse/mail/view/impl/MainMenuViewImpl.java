@@ -2,7 +2,18 @@ package com.metaverse.mail.view.impl;
 
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.Session;
+import com.metaverse.mail.dao.impl.mail.EmailDaoImpl;
+import com.metaverse.mail.dao.interfaces.EmailDao;
+import com.metaverse.mail.dao.interfaces.EmailLinkDao;
+import com.metaverse.mail.dao.interfaces.UserDao;
+import com.metaverse.mail.dao.mock.MockEmailLinkDao;
+import com.metaverse.mail.dao.mock.MockUserDao;
+import com.metaverse.mail.service.impl.mail.EmailServiceImpl;
+import com.metaverse.mail.service.interfaces.EmailService;
+import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
+import com.metaverse.mail.view.interfaces.mail.ComposeView;
+
 import java.util.Scanner;
 
 /**
@@ -124,7 +135,7 @@ public class MainMenuViewImpl implements MainMenuView {
      *   회원 수정 (팀원 A 개발 담당)
      *   로그아웃 (세션 종료 및 로그인 메뉴로 이동)
      */
-    private void showMainMenu() {
+    public void showMainMenu() {
         consoleHelper.displayHeader("📩 메일 관리 시스템 (Main)");
         System.out.println("1. 메일 작성");
         System.out.println("2. 받은 메일함");
@@ -139,8 +150,9 @@ public class MainMenuViewImpl implements MainMenuView {
 
         switch (choice) {
             case 1:
-                // 메일 작성 (팀원 B가 구현)
-                System.out.println("[스켈톤] 메일 작성 뷰는 팀원 B가 구현할 예정입니다.");
+                // 메일 작성 - 유진 구현
+                ComposeView composeView = createComposeView();
+                composeView.showComposeForm();
                 break;
             case 2:
                 // 받은 메일함 (팀원 B가 구현)
@@ -167,5 +179,26 @@ public class MainMenuViewImpl implements MainMenuView {
                 System.out.println("→ 로그아웃 되었습니다.");
                 break;
         }
+    }
+
+    /**
+     * 메일 작성 화면 객체 생성
+     *
+     * 메일 작성에 필요한 DAO, Service 객체들을 생성하고
+     * 이를 주입받은 ComposeView 구현체를 반환합니다.
+     *
+     * @return 메일 작성 화면 객체
+     */
+    private ComposeView createComposeView() {
+        // DAO 객체 생성 - 실제 구현체 대신 Mock 사용
+        EmailDao emailDao = new EmailDaoImpl(); // 자신이 구현한 실제 DAO
+        EmailLinkDao emailLinkDao = new MockEmailLinkDao(); // Mock DAO
+        UserDao userDao = new MockUserDao(); // Mock DAO
+
+        // Service 객체 생성
+        EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
+
+        // View 객체 생성 및 반환
+        return new ComposeViewImpl(scanner, emailService);
     }
 }
