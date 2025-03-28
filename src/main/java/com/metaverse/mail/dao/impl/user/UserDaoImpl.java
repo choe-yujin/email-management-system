@@ -140,9 +140,16 @@ public class UserDaoImpl implements UserDao {
         user.setEmailPwd(rs.getString("email_pwd"));  // 해시된 비밀번호 설정
         user.setNickname(rs.getString("nickname"));  // 닉네임 설정
         user.setStatus(rs.getString("status").charAt(0));  // 상태 설정
-        user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());  // 생성일 설정
-        user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());  // 수정일 설정
-        user.setDeletedAt(rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null);  // 삭제일 설정
+
+        // null 체크 후 toLocalDateTime 호출
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        user.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime() : null); // 생성일 설정
+
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        user.setUpdatedAt(updatedAt != null ? updatedAt.toLocalDateTime() : null); // 수정일 설정
+
+        Timestamp deletedAt = rs.getTimestamp("deleted_at");
+        user.setDeletedAt(deletedAt != null ? deletedAt.toLocalDateTime() : null); // 삭제일 설정
         return user;  // User 객체 반환
     }
 }

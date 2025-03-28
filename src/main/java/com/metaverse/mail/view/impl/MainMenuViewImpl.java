@@ -1,19 +1,28 @@
 package com.metaverse.mail.view.impl;
 
 import com.metaverse.mail.common.ConsoleHelper;
+import com.metaverse.mail.common.JDBCConnection;
 import com.metaverse.mail.common.Session;
 import com.metaverse.mail.dao.impl.mail.EmailDaoImpl;
+import com.metaverse.mail.dao.impl.user.UserDaoImpl;
 import com.metaverse.mail.dao.interfaces.EmailDao;
 import com.metaverse.mail.dao.interfaces.EmailLinkDao;
 import com.metaverse.mail.dao.interfaces.UserDao;
 import com.metaverse.mail.dao.mock.MockEmailLinkDao;
 import com.metaverse.mail.dao.mock.MockUserDao;
 import com.metaverse.mail.service.impl.mail.EmailServiceImpl;
+import com.metaverse.mail.service.impl.user.UserServiceImpl;
 import com.metaverse.mail.service.interfaces.EmailService;
+import com.metaverse.mail.service.interfaces.UserService;
 import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
+import com.metaverse.mail.view.impl.user.LoginViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
 import com.metaverse.mail.view.interfaces.mail.ComposeView;
+import com.metaverse.mail.view.interfaces.user.LoginView;
 
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 /**
@@ -107,7 +116,8 @@ public class MainMenuViewImpl implements MainMenuView {
         switch (choice) {
             case 1:
                 // 로그인 뷰 (팀원 A가 구현)
-                System.out.println("[스켈톤] 로그인 뷰는 팀원 A가 구현할 예정입니다.");
+                LoginView loginView = createLoginView(); // LoginView 객체 생성
+                loginView.showLoginForm(); // 로그인 폼 화면 표시
                 break;
             case 2:
                 // 회원가입 뷰 (팀원 A가 구현)
@@ -117,6 +127,17 @@ public class MainMenuViewImpl implements MainMenuView {
                 System.out.println("프로그램을 종료합니다.");
                 System.exit(0);
                 break;
+        }
+    }
+
+    private LoginView createLoginView() {
+        try {
+            Connection connection = JDBCConnection.getConnection(); // DB 연결 가져오기
+            UserDao userDao = new UserDaoImpl(connection); // UserDaoImpl에 전달
+            UserService userService = new UserServiceImpl(userDao);
+            return new LoginViewImpl(consoleHelper, userService);
+        } catch (SQLException e) {
+            throw new RuntimeException("데이터베이스 연결 실패!", e);
         }
     }
 
