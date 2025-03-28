@@ -5,18 +5,18 @@
         <!-- 사용자 ID로 사용자 정보를 조회하는 쿼리 -->
         <!-- 매개변수: idx(int) -->
         <!-- 구현 필요 -->
-        SELECT idx, email_id, email_pwd, nickname, status created_at, update_at, deleted_at
+        SELECT idx, email_id, email_pwd, nickname, status, created_at, updated_at, deleted_at
         FROM USER
-        WHERE idx = #{idx}
+        WHERE idx = ?
     </query>
 
     <query id="findUserByEmailId">
         <!-- 이메일 아이디로 사용자 정보를 조회하는 쿼리 (로그인 시 사용) -->
         <!-- 매개변수: email_id(String) -->
         <!-- 구현 필요 -->
-        SELECT idx, email_id, email_pwd, nickname, status created_at, update_at, deleted_at
+        SELECT idx, email_id, email_pwd, nickname, status, created_at, updated_at, deleted_at
         FROM USER
-        WHERE emailid = #{email_id}
+        WHERE email_id = ?
     </query>
 
     <query id="insertUser">
@@ -24,7 +24,7 @@
         <!-- 매개변수: email_id(String), email_pwd(String), nickname(String), status(char) -->
         <!-- 구현 필요 -->
         INSERT INTO USER (email_id, email_pwd, nickname, status, created_at)
-        VALUES (#{email_id}, #{email_pwd}, #{nickname}, #{status}, NOW())
+        VALUES (?, ?, ?, ?, NOW())
     </query>
 
     <query id="updateUser">
@@ -32,8 +32,8 @@
         <!-- 매개변수: email_pwd(String), nickname(String), status(char), idx(int) -->
         <!-- 구현 필요 -->
         UPDATE USER
-        SET email_pwd = #{email_pwd}, nickname = #{nickname}, status = #{status}, updated_at = NOW()
-        WHERE idx = #{idx}
+        SET email_pwd = ?, nickname = ?, status = ?, updated_at = NOW()
+        WHERE idx = ?
     </query>
 
     <query id="updateUserStatus">
@@ -41,8 +41,8 @@
         <!-- 매개변수: status(char), idx(int) -->
         <!-- 구현 필요 -->
         UPDATE USER
-        SET status = #{status}, updated_at = NOW()
-        WHERE idx = #{idx}
+        SET status = ?, updated_at = NOW()
+        WHERE idx = ?
     </query>
 
     <!-- 이메일 관련 쿼리 (개발자 B - 유진님 담당) -->
