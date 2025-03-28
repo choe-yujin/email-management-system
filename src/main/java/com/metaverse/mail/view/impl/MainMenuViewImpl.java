@@ -60,33 +60,6 @@ public class MainMenuViewImpl implements MainMenuView {
             }
         }
     }
-
-    /**
-     * 사용자의 메뉴 선택을 받는 메서드
-     * 
-     * 이 구현체에서는 직접 사용되지 않고, showLoginMenu()와 showMainMenu() 메서드에서
-     * ConsoleHelper를 통해 사용자 입력을 직접 처리합니다.
-     * 
-     * @return 선택한 메뉴 번호 (이 구현에서는 항상 0을 반환)
-     */
-    @Override
-    public int getMenuChoice() {
-        // 구현은 팀원들이 작성
-        return 0;
-    }
-
-    /**
-     * 선택된 메뉴를 실행하는 메서드
-     * 
-     * 이 구현체에서는 직접 사용되지 않고, showLoginMenu()와 showMainMenu() 메서드에서
-     * switch 문을 통해 메뉴 실행을 직접 처리합니다.
-     * 
-     * @param choice 실행할 메뉴 번호
-     */
-    @Override
-    public void executeMenu(int choice) {
-        // 구현은 팀원들이 작성
-    }
     
     /**
      * 사용자 정보 표시
@@ -98,16 +71,6 @@ public class MainMenuViewImpl implements MainMenuView {
         consoleHelper.displayHeader("사용자 정보");
         System.out.println("현재 로그인된 사용자: " + username);
         consoleHelper.displayDivider();
-    }
-    
-    /**
-     * 시스템 알림 표시
-     * 
-     * @param message 알림 메시지
-     */
-    @Override
-    public void showNotification(String message) {
-        System.out.println("📢 알림: " + message);
     }
 
     /**
