@@ -3,6 +3,7 @@ package com.metaverse.mail.view.impl;
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.JDBCConnection;
 import com.metaverse.mail.common.Session;
+import com.metaverse.mail.dao.impl.inbox.EmailLinkDaoImpl;
 import com.metaverse.mail.dao.impl.mail.EmailDaoImpl;
 import com.metaverse.mail.dao.impl.user.UserDaoImpl;
 import com.metaverse.mail.dao.interfaces.EmailDao;
@@ -29,46 +30,57 @@ import java.util.Scanner;
 
 /**
  * 애플리케이션의 메인 메뉴 화면을 구현하는 클래스
- * 
+ *
  * 이 클래스는 애플리케이션의 주요 진입점으로, 로그인 전/후의 메뉴를 표시하고
  * 사용자 선택에 따라 적절한 뷰로 전환합니다.
- * 
+ *
  * 주요 기능:
  *
  *   로그인 전 메뉴 표시 (로그인, 회원가입, 종료)
  *   로그인 후 메뉴 표시 (메일 작성, 받은 메일함, 보낸 메일함 등)
  *   사용자 메뉴 선택 처리 및 해당 뷰로 전환
  *   로그아웃 및 종료 처리
- * 
+ *
  * @author 유진
  * @version 1.0
  */
 public class MainMenuViewImpl implements MainMenuView {
     /** 사용자 입력을 처리하는 Scanner 객체 */
     private Scanner scanner;
-    
+
     /** 콘솔 UI 헬퍼 객체 */
     private ConsoleHelper consoleHelper;
-    
+
     /** 사용자 세션 정보 */
     private Session session;
 
+    /** JDBC connection 객체 */
+    private Connection connection;
+
     /**
      * 메인 메뉴 뷰 생성자
-     * 
+     *
      * Scanner 객체를 받아 ConsoleHelper와 Session 객체를 초기화합니다.
-     * 
+     *
      * @param scanner 사용자 입력을 읽기 위한 Scanner 객체
      */
+
+    // 생성자에서 Connection 초기화
     public MainMenuViewImpl(Scanner scanner) {
         this.scanner = scanner;
         this.consoleHelper = new ConsoleHelper(scanner);
         this.session = Session.getInstance();
+
+        try {
+            this.connection = JDBCConnection.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException("데이터베이스 연결 실패!", e);
+        }
     }
 
     /**
      * 메인 메뉴 화면을 표시하고 사용자 입력을 처리하는 메인 메서드
-     * 
+     *
      * 로그인 상태에 따라 적절한 메뉴(로그인 메뉴 또는 메인 메뉴)를 표시하고
      * 무한 루프를 통해 계속해서 사용자 입력을 처리합니다.
      */
@@ -82,10 +94,10 @@ public class MainMenuViewImpl implements MainMenuView {
             }
         }
     }
-    
+
     /**
      * 사용자 정보 표시
-     * 
+     *
      * @param username 사용자 이름
      */
     @Override
@@ -97,10 +109,10 @@ public class MainMenuViewImpl implements MainMenuView {
 
     /**
      * 로그인 전 메뉴를 표시하고 사용자 선택을 처리하는 메서드
-     * 
+     *
      * 로그인, 회원가입, 종료 옵션을 표시하고 사용자의 선택에 따라
      * 해당 기능을 수행하는 뷰로 전환합니다.
-     * 
+     *
      * 메뉴 옵션:
      *   로그인 (팀원 A 개발 담당)
      *   회원가입 (팀원 A 개발 담당)
@@ -133,22 +145,17 @@ public class MainMenuViewImpl implements MainMenuView {
     }
 
     private LoginView createLoginView() {
-        try {
-            Connection connection = JDBCConnection.getConnection(); // DB 연결 가져오기
-            UserDao userDao = new UserDaoImpl(connection); // UserDaoImpl에 전달
-            UserService userService = new UserServiceImpl(userDao);
-            return new LoginViewImpl(consoleHelper, userService);
-        } catch (SQLException e) {
-            throw new RuntimeException("데이터베이스 연결 실패!", e);
-        }
+        UserDao userDao = new UserDaoImpl(connection); // UserDaoImpl에 전달
+        UserService userService = new UserServiceImpl(userDao);
+        return new LoginViewImpl(consoleHelper, userService);
     }
 
     /**
      * 로그인 후 메인 메뉴를 표시하고 사용자 선택을 처리하는 메서드
-     * 
+     *
      * 메일 관리와 관련된 주요 기능들(메일 작성, 받은 메일함, 보낸 메일함 등)을 표시하고
      * 사용자의 선택에 따라 해당 기능을 수행하는 뷰로 전환합니다.
-     * 
+     *
      * 메뉴 옵션:
      *   메일 작성 (팀원 B 개발 담당)
      *   받은 메일함 (팀원 B 개발 담당)
@@ -214,10 +221,9 @@ public class MainMenuViewImpl implements MainMenuView {
      * @return 메일 작성 화면 객체
      */
     private ComposeView createComposeView() {
-        // DAO 객체 생성 - 실제 구현체 대신 Mock 사용
-        EmailDao emailDao = new EmailDaoImpl(); // 자신이 구현한 실제 DAO
-        EmailLinkDao emailLinkDao = new MockEmailLinkDao(); // Mock DAO
-        UserDao userDao = new MockUserDao(); // Mock DAO
+        EmailDao emailDao = new EmailDaoImpl(connection);
+        EmailLinkDao emailLinkDao = new EmailLinkDaoImpl(connection);
+        UserDao userDao = new UserDaoImpl(connection);
 
         // Service 객체 생성
         EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
@@ -227,10 +233,9 @@ public class MainMenuViewImpl implements MainMenuView {
     }
 
     private InboxView createInboxView() {
-        // DAO 객체 생성 - 실제 구현체 대신 Mock 사용
-        EmailDao emailDao = new EmailDaoImpl(); // 자신이 구현한 실제 DAO
-        EmailLinkDao emailLinkDao = new MockEmailLinkDao(); // Mock DAO
-        UserDao userDao = new MockUserDao(); // Mock DAO
+        EmailDao emailDao = new EmailDaoImpl(connection);
+        EmailLinkDao emailLinkDao = new EmailLinkDaoImpl(connection);
+        UserDao userDao = new UserDaoImpl(connection);
 
         // Service 객체 생성
         EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
