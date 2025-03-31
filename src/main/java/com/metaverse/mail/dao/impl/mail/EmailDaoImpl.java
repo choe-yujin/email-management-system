@@ -101,7 +101,32 @@ public class EmailDaoImpl implements EmailDao {
      */
     @Override
     public Email getEmailById(int emailId) {
-        return null;
+        String query = QueryUtil.getQuery("getEmailById");
+        Email email = null;
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, emailId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    email = new Email();
+                    email.setEmailIdx(rs.getInt("email_idx"));
+                    email.setSenderId(rs.getInt("sender_id"));
+                    email.setTitle(rs.getString("title"));
+                    email.setBody(rs.getString("body"));
+                    email.setStatus(rs.getString("status").charAt(0));
+
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    if (createdAt != null) {
+                        email.setCreatedAt(createdAt.toLocalDateTime());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return email;
     }
 
     /**
