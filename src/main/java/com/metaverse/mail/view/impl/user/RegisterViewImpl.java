@@ -11,13 +11,11 @@ import java.util.Scanner;
 public class RegisterViewImpl implements RegisterView {
     private final UserService userService; // UserService 객체: 회원가입 검증을 담당
     private final ConsoleHelper consoleHelper; // ConsoleHelper 객체: 콘솔 입출력을 담당
-    private final Scanner scanner; // Scanner 객체 추가
 
     // RegisterView 생성자: ConsoleHelper와 UserService 객체를 주입받아 초기화
     public RegisterViewImpl(ConsoleHelper consoleHelper, UserService userService) {
         this.consoleHelper = consoleHelper;
         this.userService = userService;
-        this.scanner = new Scanner(System.in); // Scanner 초기화 추가
     }
 
     @Override
