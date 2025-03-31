@@ -47,7 +47,18 @@ public class EmailLinkDaoImpl implements EmailLinkDao {
      */
     @Override
     public boolean createEmailLink(int emailId, int receiverId) {
-        return false;
+        String query = QueryUtil.getQuery("createEmailLink");
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, emailId);
+            ps.setInt(2, receiverId);
+            int result = ps.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            System.err.println("이메일 링크 생성 실패: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
