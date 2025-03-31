@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 사용자가 존재하면, 비밀번호 일치 여부를 검증
-        if (password.trim().equals(user.getEmailPwd().trim())) {
+        if (password.equals(user.getEmailPwd())) {
             return user; // 비밀번호가 맞으면 사용자 객체 반환
         } else {
             return null; // 비밀번호가 틀리면 null 반환
