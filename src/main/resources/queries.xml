@@ -62,7 +62,19 @@
     <query id="getEmailsBySenderId">
         <!-- 발신자 ID로 보낸 이메일 목록을 조회하는 쿼리 -->
         <!-- 매개변수: sender_id(int) -->
-        <!-- 구현 필요 -->
+        SELECT
+        email_idx,
+        sender_id,
+        title,
+        body,
+        status,
+        created_at
+        FROM
+        EMAIL
+        WHERE
+        sender_id = ?
+        ORDER BY
+        created_at DESC
     </query>
 
     <query id="searchEmailsByKeyword">
@@ -82,7 +94,16 @@
     <query id="getLinkById">
         <!-- 링크 ID로 이메일 링크 정보를 조회하는 쿼리 -->
         <!-- 매개변수: link_idx(int) -->
-        <!-- 구현 필요 -->
+        SELECT
+        link_idx,
+        receiver_id,
+        email_idx,
+        is_readed,
+        is_deleted
+        FROM
+        EMAIL_LINK
+        WHERE
+        link_idx = ?
     </query>
 
     <query id="getLinksByReceiverId">
@@ -115,13 +136,20 @@
     <query id="markAsRead">
         <!-- 이메일을 읽음 상태로 변경하는 쿼리 -->
         <!-- 매개변수: link_idx(int) -->
-        <!-- 구현 필요 -->
+        UPDATE
+        EMAIL_LINK
+        SET
+        is_readed = 'Y'
+        WHERE
+        link_idx = ?
     </query>
 
     <query id="markAsDeleted">
         <!-- 이메일을 삭제 상태로 변경하는 쿼리 (휴지통으로 이동) -->
         <!-- 매개변수: link_idx(int) -->
-        <!-- 구현 필요 -->
+        UPDATE EMAIL_LINK
+        SET is_deleted = 'Y'
+        WHERE link_idx = ?
     </query>
 
     <query id="restoreEmailLink">
@@ -134,7 +162,8 @@
     <query id="addToTrash">
         <!-- 삭제된 이메일을 휴지통에 추가하는 쿼리 -->
         <!-- 매개변수: link_id(int) -->
-        <!-- 구현 필요 -->
+        INSERT INTO TRASH (link_id, deleted_at, expiration_date, is_restored)
+        VALUES (?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'N')
     </query>
 
     <query id="getTrashByUserId">

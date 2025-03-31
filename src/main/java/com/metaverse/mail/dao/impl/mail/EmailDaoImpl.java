@@ -6,6 +6,7 @@ import com.metaverse.mail.dao.interfaces.EmailDao;
 import com.metaverse.mail.model.Email;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -140,7 +141,35 @@ public class EmailDaoImpl implements EmailDao {
      */
     @Override
     public List<Email> getEmailsBySenderId(int senderId) {
-        return List.of();
+        String query = QueryUtil.getQuery("getEmailsBySenderId");
+        List<Email> emails = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, senderId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Email email = new Email();
+                    email.setEmailIdx(rs.getInt("email_idx"));
+                    email.setSenderId(rs.getInt("sender_id"));
+                    email.setTitle(rs.getString("title"));
+                    email.setBody(rs.getString("body"));
+                    email.setStatus(rs.getString("status").charAt(0));
+
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    if (createdAt != null) {
+                        email.setCreatedAt(createdAt.toLocalDateTime());
+                    }
+
+                    emails.add(email);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("보낸 이메일 목록 조회 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return emails;
     }
 
     /**

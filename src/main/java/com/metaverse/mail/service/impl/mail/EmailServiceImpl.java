@@ -196,7 +196,7 @@ public class EmailServiceImpl implements EmailService {
         List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(userId)
                 .stream()
                 .filter(link -> link.getIsDeleted() == 'N')
-                .collect(Collectors.toList());
+                .toList(); // 반환된 리스트를 수정할 계획이 있다면 collect으로, 없다면 toList()로
 
         List<ReceivedEmailDto> receivedEmails = new ArrayList<>();
         for (EmailLink link : emailLinks) {
@@ -242,11 +242,69 @@ public class EmailServiceImpl implements EmailService {
      * @param userId  사용자 ID
      * @return 이메일 상세 정보
      */
+    /**
+     * 이메일 상세 정보 조회
+     *
+     * 특정 이메일의 상세 내용을 조회합니다.
+     * 이메일을 읽을 때 호출되며, 읽음 상태로 자동 변경됩니다.
+     *
+     * 주요 처리 내용:
+     * 이메일 존재 여부 확인
+     * 사용자 권한 확인(이메일 수신자 또는 발신자인지)
+     * 읽음 상태로 변경
+     * 상세 정보 DTO 변환
+     *
+     * @param emailId 이메일 ID
+     * @param userId 사용자 ID
+     * @return 이메일 상세 정보
+     */
     @Override
     public ReceivedEmailDto getEmailDetails(int emailId, int userId) {
-        return null;
-    }
+        // 이메일 정보 조회
+        Email email = emailDao.getEmailById(emailId);
 
+        if (email == null) {
+            System.err.println("이메일을 찾을 수 없습니다: " + emailId);
+            return null;
+        }
+
+        // 사용자가 해당 이메일의 수신자인지 확인
+        List<EmailLink> links = emailLinkDao.getLinksByReceiverId(userId)
+                .stream()
+                .filter(link -> link.getEmailIdx() == emailId)
+                .collect(Collectors.toList()); // 반환된 리스트를 수정할 계획이 있다면 collect 으로, 없다면 toList()로
+
+        if (links.isEmpty()) {
+            System.err.println("사용자가 해당 이메일의 수신자가 아닙니다.");
+            return null;
+        }
+
+        EmailLink emailLink = links.get(0);
+
+        // 이메일 읽음 상태로 변경 (아직 읽지 않은 경우)
+        if (emailLink.getIsReaded() == 'N') {
+            emailLinkDao.markAsRead(emailLink.getLinkIdx());
+        }
+
+        // 발신자 정보 조회
+        User sender = userDao.findById(email.getSenderId());
+
+        if (sender == null) {
+            System.err.println("발신자 정보를 찾을 수 없습니다.");
+            return null;
+        }
+
+        // DTO 변환 및 반환
+        return new ReceivedEmailDto(
+                email.getEmailIdx(),
+                sender.getNickname(),
+                sender.getEmailId(),
+                email.getTitle(),
+                email.getBody(),
+                true, // 읽음 상태로 처리됨
+                email.getCreatedAt()
+        );
+    }
     /**
      * 키워드로 이메일 검색
      *
