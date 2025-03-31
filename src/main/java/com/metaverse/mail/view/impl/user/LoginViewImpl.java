@@ -1,5 +1,6 @@
 package com.metaverse.mail.view.impl.user;
 
+import com.metaverse.mail.common.Constants;
 import com.metaverse.mail.common.Session;
 import com.metaverse.mail.dto.user.UserLoginDto;
 import com.metaverse.mail.model.User;
@@ -27,8 +28,9 @@ public class LoginViewImpl implements LoginView {
             // 로그인 화면 제목 출력
             consoleHelper.displayHeader("🔐 로그인");
 
-            // 사용자로부터 아이디와 비밀번호를 입력 받음
-            String emailId = consoleHelper.getStringInput("아이디: ");
+            // 사용자로부터 아이디와 비밀번호를 입력 받음 (아이디는 이메일 형식으로 변환됨)
+            String userId = consoleHelper.getStringInput("아이디: ");
+            String emailId = Constants.toEmail(userId);
             String password = consoleHelper.getPasswordInput("비밀번호: ");
             consoleHelper.displayDivider(); // 구분선 출력
 
