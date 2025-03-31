@@ -54,7 +54,9 @@
     <query id="getEmailById">
         <!-- 이메일 ID로 이메일 정보를 조회하는 쿼리 -->
         <!-- 매개변수: email_idx(int) -->
-        <!-- 구현 필요 -->
+        SELECT email_idx, sender_id, title, body, status, created_at
+        FROM EMAIL
+        WHERE email_idx = ?
     </query>
 
     <query id="getEmailsBySenderId">
@@ -72,8 +74,9 @@
     <!-- 이메일 링크 관련 쿼리 (개발자 B, C 공동 담당) -->
     <query id="createEmailLink">
         <!-- 이메일과 수신자를 연결하는 쿼리 (이메일 발송 시) -->
-        <!-- 매개변수: receiver_id(int), email_idx(int) -->
-        <!-- 구현 필요 -->
+        <!-- 매개변수: email_idx(int), receiver_id(int) -->
+        INSERT INTO EMAIL_LINK (email_idx, receiver_id, is_readed, is_deleted)
+        VALUES (?, ?, 'N', 'N')
     </query>
 
     <query id="getLinkById">
@@ -86,13 +89,16 @@
         <!-- 수신자 ID로 받은 이메일 링크 목록을 조회하는 쿼리 -->
         <!-- 매개변수: receiver_id(int) -->
         SELECT
-        e.email_idx,
+        el.link_idx,
+        el.receiver_id,
+        el.email_idx,
+        el.is_readed,
+        el.is_deleted,
         e.title,
         e.body,
         e.created_at,
         u.nickname as sender_name,
-        u.email_id as sender_email,
-        el.is_readed
+        u.email_id as sender_email
         FROM
         EMAIL_LINK el
         JOIN
