@@ -4,16 +4,18 @@ import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.JDBCConnection;
 import com.metaverse.mail.common.Session;
 import com.metaverse.mail.dao.impl.inbox.EmailLinkDaoImpl;
+import com.metaverse.mail.dao.impl.inbox.TrashDaoImpl;
 import com.metaverse.mail.dao.impl.mail.EmailDaoImpl;
 import com.metaverse.mail.dao.impl.user.UserDaoImpl;
 import com.metaverse.mail.dao.interfaces.EmailDao;
 import com.metaverse.mail.dao.interfaces.EmailLinkDao;
+import com.metaverse.mail.dao.interfaces.TrashDao;
 import com.metaverse.mail.dao.interfaces.UserDao;
-import com.metaverse.mail.dao.mock.MockEmailLinkDao;
-import com.metaverse.mail.dao.mock.MockUserDao;
+import com.metaverse.mail.service.impl.inbox.InboxServiceImpl;
 import com.metaverse.mail.service.impl.mail.EmailServiceImpl;
 import com.metaverse.mail.service.impl.user.UserServiceImpl;
 import com.metaverse.mail.service.interfaces.EmailService;
+import com.metaverse.mail.service.interfaces.InboxService;
 import com.metaverse.mail.service.interfaces.UserService;
 import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
 import com.metaverse.mail.view.impl.user.LoginViewImpl;
@@ -24,7 +26,6 @@ import com.metaverse.mail.view.interfaces.mail.ComposeView;
 import com.metaverse.mail.view.interfaces.user.LoginView;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
 import com.metaverse.mail.view.interfaces.user.RegisterView;
-
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -59,6 +60,17 @@ public class MainMenuViewImpl implements MainMenuView {
     /** JDBC connection 객체 */
     private Connection connection;
 
+    /** DAO 객체들 */
+    private EmailDao emailDao;
+    private EmailLinkDao emailLinkDao;
+    private UserDao userDao;
+    private TrashDao trashDao;
+
+    /** Service 객체들 */
+    private EmailService emailService;
+    private UserService userService;
+    private InboxService inboxService;
+
     /**
      * 메인 메뉴 뷰 생성자
      *
@@ -66,15 +78,25 @@ public class MainMenuViewImpl implements MainMenuView {
      *
      * @param scanner 사용자 입력을 읽기 위한 Scanner 객체
      */
-
-    // 생성자에서 Connection 초기화
     public MainMenuViewImpl(Scanner scanner) {
         this.scanner = scanner;
         this.consoleHelper = new ConsoleHelper(scanner);
         this.session = Session.getInstance();
 
         try {
+            // DB 연결 초기화
             this.connection = JDBCConnection.getConnection();
+
+            // DAO 객체 초기화
+            this.emailDao = new EmailDaoImpl(connection);
+            this.emailLinkDao = new EmailLinkDaoImpl(connection);
+            this.userDao = new UserDaoImpl(connection);
+            this.trashDao = new TrashDaoImpl(connection);
+
+            // Service 객체 초기화
+            this.emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
+            this.userService = new UserServiceImpl(userDao);
+            this.inboxService = new InboxServiceImpl(emailDao, emailLinkDao, userDao, trashDao);
         } catch (SQLException e) {
             throw new RuntimeException("데이터베이스 연결 실패!", e);
         }
@@ -111,14 +133,6 @@ public class MainMenuViewImpl implements MainMenuView {
 
     /**
      * 로그인 전 메뉴를 표시하고 사용자 선택을 처리하는 메서드
-     *
-     * 로그인, 회원가입, 종료 옵션을 표시하고 사용자의 선택에 따라
-     * 해당 기능을 수행하는 뷰로 전환합니다.
-     *
-     * 메뉴 옵션:
-     *   로그인 (팀원 A 개발 담당)
-     *   회원가입 (팀원 A 개발 담당)
-     *   종료 (프로그램 종료)
      */
     private void showLoginMenu() {
         consoleHelper.displayHeader("📩 메일 관리 시스템 (Console)");
@@ -132,48 +146,39 @@ public class MainMenuViewImpl implements MainMenuView {
         switch (choice) {
             case 1:
                 // 로그인 뷰 (팀원 A가 구현)
-                LoginView loginView = createLoginView(); // LoginView 객체 생성
-                loginView.showLoginForm(); // 로그인 폼 화면 표시
+                LoginView loginView = createLoginView();
+                loginView.showLoginForm();
                 break;
             case 2:
                 // 회원가입 뷰 (팀원 A가 구현)
-                RegisterView registerView = createRegisterView(); // RegisterView 객체 생성
-                registerView.showRegistrationForm(); // 회원가입 폼 화면 표시
+                RegisterView registerView = createRegisterView();
+                registerView.showRegistrationForm();
                 break;
             case 3:
                 System.out.println("프로그램을 종료합니다.");
-                System.exit(0);
+                try {
+                    // 연결 종료 - 자원 정리
+                    if (connection != null && !connection.isClosed()) {
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    System.err.println("연결 종료 중 오류: " + e.getMessage());
+                }
+                System.exit(0); // 프로그램 종료
                 break;
         }
     }
 
     private LoginView createLoginView() {
-        UserDao userDao = new UserDaoImpl(connection); // UserDaoImpl에 전달
-        UserService userService = new UserServiceImpl(userDao);
         return new LoginViewImpl(consoleHelper, userService);
     }
 
     private RegisterView createRegisterView() {
-        UserDao userDao = new UserDaoImpl(connection); // UserDaoImpl에 전달
-        UserService userService = new UserServiceImpl(userDao);
         return new RegisterViewImpl(consoleHelper, userService);
     }
 
-
     /**
      * 로그인 후 메인 메뉴를 표시하고 사용자 선택을 처리하는 메서드
-     *
-     * 메일 관리와 관련된 주요 기능들(메일 작성, 받은 메일함, 보낸 메일함 등)을 표시하고
-     * 사용자의 선택에 따라 해당 기능을 수행하는 뷰로 전환합니다.
-     *
-     * 메뉴 옵션:
-     *   메일 작성 (팀원 B 개발 담당)
-     *   받은 메일함 (팀원 B 개발 담당)
-     *   보낸 메일함 (팀원 C 개발 담당)
-     *   메일 검색 (팀원 B 개발 담당)
-     *   휴지통 (팀원 C 개발 담당)
-     *   회원 수정 (팀원 A 개발 담당)
-     *   로그아웃 (세션 종료 및 로그인 메뉴로 이동)
      */
     public void showMainMenu() {
         consoleHelper.displayHeader("📩 메일 관리 시스템 (Main)");
@@ -225,32 +230,19 @@ public class MainMenuViewImpl implements MainMenuView {
     /**
      * 메일 작성 화면 객체 생성
      *
-     * 메일 작성에 필요한 DAO, Service 객체들을 생성하고
-     * 이를 주입받은 ComposeView 구현체를 반환합니다.
-     *
      * @return 메일 작성 화면 객체
      */
     private ComposeView createComposeView() {
-        EmailDao emailDao = new EmailDaoImpl(connection);
-        EmailLinkDao emailLinkDao = new EmailLinkDaoImpl(connection);
-        UserDao userDao = new UserDaoImpl(connection);
-
-        // Service 객체 생성
-        EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
-
-        // View 객체 생성 및 반환
         return new ComposeViewImpl(scanner, emailService);
     }
 
+    /**
+     * 받은 메일함 화면 객체 생성
+     *
+     * @return 받은 메일함 화면 객체
+     */
     private InboxView createInboxView() {
-        EmailDao emailDao = new EmailDaoImpl(connection);
-        EmailLinkDao emailLinkDao = new EmailLinkDaoImpl(connection);
-        UserDao userDao = new UserDaoImpl(connection);
-
-        // Service 객체 생성
-        EmailService emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
-
-        // View 객체 생성 및 반환
-        return new InboxViewImpl(scanner, emailService);
+        return new InboxViewImpl(scanner, emailService, inboxService);
     }
+
 }

@@ -147,7 +147,9 @@
     <query id="markAsDeleted">
         <!-- 이메일을 삭제 상태로 변경하는 쿼리 (휴지통으로 이동) -->
         <!-- 매개변수: link_idx(int) -->
-        <!-- 구현 필요 -->
+        UPDATE EMAIL_LINK
+        SET is_deleted = 'Y'
+        WHERE link_idx = ?
     </query>
 
     <query id="restoreEmailLink">
@@ -160,7 +162,8 @@
     <query id="addToTrash">
         <!-- 삭제된 이메일을 휴지통에 추가하는 쿼리 -->
         <!-- 매개변수: link_id(int) -->
-        <!-- 구현 필요 -->
+        INSERT INTO TRASH (link_id, deleted_at, expiration_date, is_restored)
+        VALUES (?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'N')
     </query>
 
     <query id="getTrashByUserId">
