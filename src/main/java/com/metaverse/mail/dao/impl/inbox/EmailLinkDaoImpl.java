@@ -71,7 +71,32 @@ public class EmailLinkDaoImpl implements EmailLinkDao {
      */
     @Override
     public EmailLink getLinkById(int linkId) {
-        return null;
+        String query = QueryUtil.getQuery("getLinkById");
+        EmailLink emailLink = null;
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, linkId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    emailLink = new EmailLink();
+                    emailLink.setLinkIdx(rs.getInt("link_idx"));
+                    emailLink.setReceiverId(rs.getInt("receiver_id"));
+                    emailLink.setEmailIdx(rs.getInt("email_idx"));
+
+                    String isReaded = rs.getString("is_readed");
+                    emailLink.setIsReaded(isReaded != null && !isReaded.isEmpty() ? isReaded.charAt(0) : 'N');
+
+                    String isDeleted = rs.getString("is_deleted");
+                    emailLink.setIsDeleted(isDeleted != null && !isDeleted.isEmpty() ? isDeleted.charAt(0) : 'N');
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("이메일 링크 조회 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return emailLink;
     }
 
     /**
@@ -125,7 +150,18 @@ public class EmailLinkDaoImpl implements EmailLinkDao {
      */
     @Override
     public boolean markAsRead(int linkId) {
-        return false;
+        String query = QueryUtil.getQuery("markAsRead");
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, linkId);
+
+            int updatedRows = ps.executeUpdate();
+            return updatedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("이메일 읽음 상태 변경 실패: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

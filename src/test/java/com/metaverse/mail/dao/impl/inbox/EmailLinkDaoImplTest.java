@@ -1,32 +1,31 @@
 package com.metaverse.mail.dao.impl.inbox;
 
 import com.metaverse.mail.common.JDBCConnection;
+import com.metaverse.mail.dao.impl.mail.EmailDaoImpl;
+import com.metaverse.mail.dao.impl.user.UserDaoImpl;
 import com.metaverse.mail.dao.interfaces.EmailDao;
 import com.metaverse.mail.dao.interfaces.EmailLinkDao;
 import com.metaverse.mail.dao.interfaces.UserDao;
-import com.metaverse.mail.dao.mock.MockEmailDao;
-import com.metaverse.mail.dao.mock.MockEmailLinkDao;
-import com.metaverse.mail.dao.mock.MockUserDao;
+import com.metaverse.mail.model.Email;
 import com.metaverse.mail.model.EmailLink;
-import com.metaverse.mail.service.impl.mail.EmailServiceImpl;
-import com.metaverse.mail.service.interfaces.EmailService;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class EmailLinkDaoImplTest {
+
     private static Connection connection;
-    private EmailService emailService;
     private EmailDao emailDao;
     private EmailLinkDao emailLinkDao;
     private UserDao userDao;
+
+    // 테스트에 사용할 이메일 ID와 수신자 ID
+    private static final int TEST_RECEIVER_ID = 2; // 테스트 데이터의 park@example.com 사용자
 
     @BeforeAll
     static void setUpBeforeClass() throws SQLException {
@@ -37,72 +36,99 @@ class EmailLinkDaoImplTest {
     @AfterAll
     static void tearDownAfterClass() {
         System.out.println("이메일 링크 DAO 테스트 종료 및 자원 반납");
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         JDBCConnection.close();
     }
 
     @BeforeEach
-    void setUp() {
-        // DAO 및 Service 객체 생성
-        emailDao = new MockEmailDao();
-        emailLinkDao = new MockEmailLinkDao();
-        userDao = new MockUserDao();
-        emailService = new EmailServiceImpl(emailDao, emailLinkDao, userDao);
+    void setUp() throws SQLException {
+        // 실제 DAO 객체 생성
+        connection = JDBCConnection.getConnection();
+        emailDao = new EmailDaoImpl(connection);
+        emailLinkDao = new EmailLinkDaoImpl(connection);
+        userDao = new UserDaoImpl(connection);
     }
 
     @Test
-    void testGetLinksByReceiverId_Success() {
-        // MockEmailLinkDao에서 특정 수신자 ID에 대한 이메일 링크 조회
-        int testReceiverId = 1;
-        List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(testReceiverId);
+    void testCreateEmailLink() {
+        // 테스트를 위한 이메일 생성
+        Email email = new Email();
+        email.setSenderId(1); // 테스트 데이터에 있는 kim@example.com 사용자
+        email.setTitle("링크 테스트 제목");
+        email.setBody("링크 테스트 내용입니다.");
+        email.setStatus('Y');
+        email.setCreatedAt(LocalDateTime.now());
 
-        // 검증
-        assertNotNull(emailLinks, "이메일 링크 목록은 null이 아니어야 합니다.");
-        assertFalse(emailLinks.isEmpty(), "이메일 링크 목록은 비어있지 않아야 합니다.");
+        int emailId = emailDao.createEmail(email);
+        assertTrue(emailId > 0, "이메일 생성이 성공해야 함");
 
-        // 첫 번째 이메일 링크 검증
-        EmailLink firstLink = emailLinks.get(0);
-        assertEquals(1, firstLink.getLinkIdx(), "링크 ID가 일치해야 합니다.");
-        assertEquals(testReceiverId, firstLink.getReceiverId(), "수신자 ID가 일치해야 합니다.");
-        assertEquals(1001, firstLink.getEmailIdx(), "이메일 ID가 일치해야 합니다.");
-        assertEquals('Y', firstLink.getIsReaded(), "읽음 상태가 일치해야 합니다.");
-        assertEquals('N', firstLink.getIsDeleted(), "삭제 상태가 일치해야 합니다.");
+        // 이메일 링크 생성 테스트
+        boolean linkCreated = emailLinkDao.createEmailLink(emailId, TEST_RECEIVER_ID);
+
+        // 결과 검증
+        assertTrue(linkCreated, "이메일 링크 생성이 성공해야 함");
     }
 
     @Test
-    void testGetLinksByReceiverId_NoResults() {
-        // 존재하지 않는 수신자 ID로 조회
-        int nonExistentReceiverId = 9999;
-        List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(nonExistentReceiverId);
+    void testGetLinksByReceiverId() {
+        // 테스트 대상 수신자가 받은 이메일 링크 조회
+        List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(TEST_RECEIVER_ID);
 
-        // 검증
-        assertNotNull(emailLinks, "이메일 링크 목록은 null이 아니어야 합니다.");
-        assertTrue(emailLinks.isEmpty(), "존재하지 않는 수신자 ID의 경우 빈 목록이 반환되어야 합니다.");
+        // 결과 검증
+        assertNotNull(emailLinks, "이메일 링크 목록은 null이 아니어야 함");
+
+        // 샘플 데이터에 해당 사용자가 받은 메일이 있다고 가정하고 검증
+        // 비어있지 않은지만 검증하고 상세 검증은 생략 (데이터에 따라 달라질 수 있음)
+        assertFalse(emailLinks.isEmpty(), "테스트 사용자는 최소 하나 이상의 이메일을 받았어야 함");
+
+        // 각 이메일 링크의 수신자 ID 검증
+        for (EmailLink link : emailLinks) {
+            assertEquals(TEST_RECEIVER_ID, link.getReceiverId(), "모든 링크의 수신자 ID가 일치해야 함");
+        }
     }
 
     @Test
-    void testGetLinksByReceiverId_MultipleLinks() {
-        // 여러 개의 이메일 링크를 가진 수신자 ID로 조회
-        int testReceiverId = 2;
-        List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(testReceiverId);
+    void testCreateAndGetEmailLink() {
+        // 테스트를 위한 이메일 생성
+        Email email = new Email();
+        email.setSenderId(1); // kim@example.com
+        email.setTitle("통합 테스트 제목");
+        email.setBody("통합 테스트 내용입니다.");
+        email.setStatus('Y');
+        email.setCreatedAt(LocalDateTime.now());
 
-        // 검증
-        assertNotNull(emailLinks, "이메일 링크 목록은 null이 아니어야 합니다.");
-        assertEquals(2, emailLinks.size(), "2개의 이메일 링크가 반환되어야 합니다.");
+        int emailId = emailDao.createEmail(email);
+        assertTrue(emailId > 0, "이메일 생성이 성공해야 함");
 
-        // 첫 번째 이메일 링크 검증
-        EmailLink firstLink = emailLinks.get(0);
-        assertEquals(3, firstLink.getLinkIdx(), "첫 번째 링크 ID가 일치해야 합니다.");
-        assertEquals(testReceiverId, firstLink.getReceiverId(), "첫 번째 수신자 ID가 일치해야 합니다.");
-        assertEquals(1002, firstLink.getEmailIdx(), "첫 번째 이메일 ID가 일치해야 합니다.");
-        assertEquals('N', firstLink.getIsReaded(), "첫 번째 읽음 상태가 일치해야 합니다.");
-        assertEquals('N', firstLink.getIsDeleted(), "첫 번째 삭제 상태가 일치해야 합니다.");
+        // 이메일 링크 생성
+        boolean linkCreated = emailLinkDao.createEmailLink(emailId, TEST_RECEIVER_ID);
+        assertTrue(linkCreated, "이메일 링크 생성이 성공해야 함");
 
-        // 두 번째 이메일 링크 검증
-        EmailLink secondLink = emailLinks.get(1);
-        assertEquals(4, secondLink.getLinkIdx(), "두 번째 링크 ID가 일치해야 합니다.");
-        assertEquals(testReceiverId, secondLink.getReceiverId(), "두 번째 수신자 ID가 일치해야 합니다.");
-        assertEquals(1003, secondLink.getEmailIdx(), "두 번째 이메일 ID가 일치해야 합니다.");
-        assertEquals('N', secondLink.getIsReaded(), "두 번째 읽음 상태가 일치해야 합니다.");
-        assertEquals('N', secondLink.getIsDeleted(), "두 번째 삭제 상태가 일치해야 합니다.");
+        // 생성 후 조회
+        List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(TEST_RECEIVER_ID);
+
+        // 결과 검증 - 새로 생성한 링크가 조회되는지 확인
+        assertNotNull(emailLinks, "이메일 링크 목록은 null이 아니어야 함");
+        assertFalse(emailLinks.isEmpty(), "이메일 링크 목록이 비어있지 않아야 함");
+
+        // 새로 생성한 이메일 링크가 목록에 포함되어 있는지 확인
+        boolean foundNewLink = false;
+        for (EmailLink link : emailLinks) {
+            if (link.getEmailIdx() == emailId && link.getReceiverId() == TEST_RECEIVER_ID) {
+                foundNewLink = true;
+                assertEquals('N', link.getIsReaded(), "새 이메일은 읽지 않은 상태여야 함");
+                assertEquals('N', link.getIsDeleted(), "새 이메일은 삭제되지 않은 상태여야 함");
+                break;
+            }
+        }
+
+        assertTrue(foundNewLink, "새로 생성한 이메일 링크가 조회 결과에 포함되어야 함");
     }
+
 }

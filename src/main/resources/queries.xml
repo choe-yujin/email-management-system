@@ -62,7 +62,19 @@
     <query id="getEmailsBySenderId">
         <!-- 발신자 ID로 보낸 이메일 목록을 조회하는 쿼리 -->
         <!-- 매개변수: sender_id(int) -->
-        <!-- 구현 필요 -->
+        SELECT
+        email_idx,
+        sender_id,
+        title,
+        body,
+        status,
+        created_at
+        FROM
+        EMAIL
+        WHERE
+        sender_id = ?
+        ORDER BY
+        created_at DESC
     </query>
 
     <query id="searchEmailsByKeyword">
@@ -82,7 +94,16 @@
     <query id="getLinkById">
         <!-- 링크 ID로 이메일 링크 정보를 조회하는 쿼리 -->
         <!-- 매개변수: link_idx(int) -->
-        <!-- 구현 필요 -->
+        SELECT
+        link_idx,
+        receiver_id,
+        email_idx,
+        is_readed,
+        is_deleted
+        FROM
+        EMAIL_LINK
+        WHERE
+        link_idx = ?
     </query>
 
     <query id="getLinksByReceiverId">
@@ -115,7 +136,12 @@
     <query id="markAsRead">
         <!-- 이메일을 읽음 상태로 변경하는 쿼리 -->
         <!-- 매개변수: link_idx(int) -->
-        <!-- 구현 필요 -->
+        UPDATE
+        EMAIL_LINK
+        SET
+        is_readed = 'Y'
+        WHERE
+        link_idx = ?
     </query>
 
     <query id="markAsDeleted">
