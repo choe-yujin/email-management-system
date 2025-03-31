@@ -8,6 +8,7 @@ import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.Session;
 import com.metaverse.mail.dto.mail.ReceivedEmailDto;
 import com.metaverse.mail.service.interfaces.EmailService;
+import com.metaverse.mail.service.interfaces.InboxService;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
 
 /**
@@ -27,6 +28,9 @@ public class InboxViewImpl implements InboxView {
     /** 이메일 서비스 */
     private EmailService emailService;
 
+    /** 받은 메일함 관련 서비스 */
+    private InboxService inboxService;
+
     /** 사용자 세션 */
     private Session session;
 
@@ -38,11 +42,13 @@ public class InboxViewImpl implements InboxView {
      *
      * @param scanner 사용자 입력을 읽기 위한 Scanner 객체
      * @param emailService 이메일 서비스
+     * @param inboxService 받은 메일함 관련 서비스
      */
-    public InboxViewImpl(Scanner scanner, EmailService emailService) {
+    public InboxViewImpl(Scanner scanner, EmailService emailService, InboxService inboxService) {
         this.scanner = scanner;
         this.consoleHelper = new ConsoleHelper(scanner);
         this.emailService = emailService;
+        this.inboxService = inboxService;
         this.session = Session.getInstance();
     }
 
@@ -146,14 +152,45 @@ public class InboxViewImpl implements InboxView {
                 System.out.println("답장 기능은 아직 구현되지 않았습니다.");
                 break;
             case 2:
-                // TODO: 삭제 기능 구현 (InboxService의 deleteReceivedEmail 메서드 호출)
-                System.out.println("삭제 기능은 아직 구현되지 않았습니다.");
+                // 이메일 삭제 기능 구현
+                deleteEmail(emailId);
                 break;
             case 3:
                 // 메일함으로 돌아가기
                 showInbox();
                 break;
         }
+    }
+
+    /**
+     * 이메일 삭제 처리
+     *
+     * @param emailId 삭제할 이메일 ID
+     */
+    private void deleteEmail(int emailId) {
+        // 삭제 확인 메시지
+        boolean confirm = consoleHelper.getConfirmation("정말로 이 메일을 삭제하시겠습니까?");
+
+        if (!confirm) {
+            System.out.println("→ 삭제가 취소되었습니다.");
+            showInbox();
+            return;
+        }
+
+        // 현재 로그인한 사용자의 ID 가져오기
+        int userId = session.getCurrentUserId();
+
+        // 이메일 삭제 요청 - 주입받은 inboxService 사용
+        boolean success = inboxService.deleteReceivedEmail(emailId, userId);
+
+        if (success) {
+            System.out.println("→ 메일이 성공적으로 삭제되었습니다. 휴지통에서 확인할 수 있습니다.");
+        } else {
+            System.out.println("→ 메일 삭제에 실패했습니다.");
+        }
+
+        // 메일함으로 돌아가기
+        showInbox();
     }
 
     /**
