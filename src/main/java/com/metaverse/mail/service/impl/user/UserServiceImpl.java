@@ -44,8 +44,27 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public boolean register(UserRegisterDto userDto) {
-        return false;
+        // 1. 이메일 중복 체크
+        String email = userDto.getEmailId(); // UserRegisterDto에서 이메일 추출
+        User existingUser = userDao.findByEmailId(email); // 데이터베이스에서 이메일로 사용자 조회
+
+        if (existingUser != null) { // 이메일이 이미 존재하는 경우
+            return false; // 중복된 이메일이므로 회원가입 실패
+        }
+
+        // 2. 사용자 객체 생성 (비밀번호는 평문 그대로 사용)
+        User newUser = new User();
+        newUser.setEmailId(userDto.getEmailId()); // 이메일 설정
+        newUser.setEmailPwd(userDto.getPassword()); // 비밀번호 설정
+        newUser.setNickname(userDto.getNickname()); // 닉네임 설정
+        newUser.setStatus('A'); // 기본 상태를 'A' (활성)로 설정
+
+        // 3. 사용자 정보 저장 (DB에 저장)
+        boolean isSaved = userDao.insert(newUser); // DB에 새 사용자 저장
+
+        return isSaved; // 저장 성공 여부 반환
     }
+
 
     /*
      * 사용자 프로필 업데이트 처리
