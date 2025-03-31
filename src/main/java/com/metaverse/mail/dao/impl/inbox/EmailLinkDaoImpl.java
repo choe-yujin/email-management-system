@@ -175,9 +175,19 @@ public class EmailLinkDaoImpl implements EmailLinkDao {
      */
     @Override
     public boolean markAsDeleted(int linkId) {
-        return false;
-    }
+        String query = QueryUtil.getQuery("markAsDeleted");
 
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, linkId);
+
+            int updatedRows = ps.executeUpdate();
+            return updatedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("이메일 삭제 상태 변경 실패: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
     /**
      * 이메일을 복구 (삭제 취소)
      *
