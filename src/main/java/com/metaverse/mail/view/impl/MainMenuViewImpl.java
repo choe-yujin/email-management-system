@@ -18,10 +18,12 @@ import com.metaverse.mail.service.interfaces.UserService;
 import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
 import com.metaverse.mail.view.impl.user.LoginViewImpl;
 import com.metaverse.mail.view.impl.mail.InboxViewImpl;
+import com.metaverse.mail.view.impl.user.RegisterViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
 import com.metaverse.mail.view.interfaces.mail.ComposeView;
 import com.metaverse.mail.view.interfaces.user.LoginView;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
+import com.metaverse.mail.view.interfaces.user.RegisterView;
 
 
 import java.sql.Connection;
@@ -135,7 +137,8 @@ public class MainMenuViewImpl implements MainMenuView {
                 break;
             case 2:
                 // 회원가입 뷰 (팀원 A가 구현)
-                System.out.println("[스켈톤] 회원가입 뷰는 팀원 A가 구현할 예정입니다.");
+                RegisterView registerView = createRegisterView(); // RegisterView 객체 생성
+                registerView.showRegistrationForm(); // 회원가입 폼 화면 표시
                 break;
             case 3:
                 System.out.println("프로그램을 종료합니다.");
@@ -149,6 +152,13 @@ public class MainMenuViewImpl implements MainMenuView {
         UserService userService = new UserServiceImpl(userDao);
         return new LoginViewImpl(consoleHelper, userService);
     }
+
+    private RegisterView createRegisterView() {
+        UserDao userDao = new UserDaoImpl(connection); // UserDaoImpl에 전달
+        UserService userService = new UserServiceImpl(userDao);
+        return new RegisterViewImpl(consoleHelper, userService);
+    }
+
 
     /**
      * 로그인 후 메인 메뉴를 표시하고 사용자 선택을 처리하는 메서드
