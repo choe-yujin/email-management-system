@@ -85,7 +85,25 @@
     <query id="getLinksByReceiverId">
         <!-- 수신자 ID로 받은 이메일 링크 목록을 조회하는 쿼리 -->
         <!-- 매개변수: receiver_id(int) -->
-        <!-- 구현 필요 -->
+        SELECT
+        e.email_idx,
+        e.title,
+        e.body,
+        e.created_at,
+        u.nickname as sender_name,
+        u.email_id as sender_email,
+        el.is_readed
+        FROM
+        EMAIL_LINK el
+        JOIN
+        EMAIL e ON el.email_idx = e.email_idx
+        JOIN
+        USER u ON e.sender_id = u.idx
+        WHERE
+        el.receiver_id = ? AND
+        el.is_deleted = 'N'
+        ORDER BY
+        e.created_at DESC
     </query>
 
     <query id="markAsRead">

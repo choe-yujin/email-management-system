@@ -8,13 +8,17 @@ import com.metaverse.mail.dto.mail.EmailComposeDto;
 import com.metaverse.mail.dto.mail.EmailSearchDto;
 import com.metaverse.mail.dto.mail.ReceivedEmailDto;
 import com.metaverse.mail.model.Email;
+import com.metaverse.mail.model.EmailLink;
 import com.metaverse.mail.model.User;
 import com.metaverse.mail.service.interfaces.EmailService;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmailServiceImpl implements EmailService {
 
@@ -189,8 +193,38 @@ public class EmailServiceImpl implements EmailService {
      */
     @Override
     public List<ReceivedEmailDto> getReceivedEmails(int userId) {
-        return List.of();
+        List<EmailLink> emailLinks = emailLinkDao.getLinksByReceiverId(userId)
+                .stream()
+                .filter(link -> link.getIsDeleted() == 'N')
+                .collect(Collectors.toList());
+
+        List<ReceivedEmailDto> receivedEmails = new ArrayList<>();
+        for (EmailLink link : emailLinks) {
+            Email email = emailDao.getEmailById(link.getEmailIdx());
+            if (email == null) continue;
+
+            User sender = userDao.findById(email.getSenderId());
+            if (sender == null) continue;
+
+            // 생성자를 직접 사용하여 DTO 생성
+            ReceivedEmailDto emailDto = new ReceivedEmailDto(
+                    email.getEmailIdx(),
+                    sender.getNickname(),
+                    sender.getEmailId(),
+                    email.getTitle(),
+                    email.getBody(),
+                    link.getIsReaded() == 'Y',
+                    email.getCreatedAt()
+            );
+
+            receivedEmails.add(emailDto);
+        }
+
+        return receivedEmails.stream()
+                .sorted(Comparator.comparing(ReceivedEmailDto::getSentDate).reversed())
+                .collect(Collectors.toList());
     }
+
 
     /**
      * 이메일 상세 정보 조회
