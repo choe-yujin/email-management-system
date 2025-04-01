@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -336,7 +337,6 @@ public class EmailServiceImpl implements EmailService {
      * 원본 이메일 존재 여부 확인
      * 원본 발신자를 수신자로 설정
      * 제목에 'Re:' 접두어 추가
-     * 원본 이메일 인용 추가
      * 새 이메일 저장 및 발송
      *
      * @param originalEmailId 원본 이메일 ID
@@ -346,6 +346,31 @@ public class EmailServiceImpl implements EmailService {
      */
     @Override
     public boolean replyToEmail(int originalEmailId, String replyContent, int senderId) {
-        return false;
+        // 원본 이메일 존재 여부 확인
+        Email originalEmail = emailDao.getEmailById(originalEmailId);
+        if (originalEmail == null) {
+            System.err.println("원본 이메일을 찾을 수 없습니다: " + originalEmailId);
+            return false;
+        }
+
+        // 원본 이메일의 발신자 정보 조회
+        User originalSender = userDao.findById(originalEmail.getSenderId());
+        if (originalSender == null) {
+            System.err.println("원본 발신자 정보를 찾을 수 없습니다.");
+            return false;
+        }
+
+        // 제목 설정 (이미 Re: 가 포함되어 있지 않은 경우에만 추가)
+        String replyTitle = originalEmail.getTitle();
+        if (!replyTitle.startsWith("Re:")) {
+            replyTitle = "Re: " + replyTitle;
+        }
+
+        // 이메일 작성 DTO 생성
+        List<String> receiverEmails = Arrays.asList(originalSender.getEmailId());
+        EmailComposeDto replyDto = new EmailComposeDto(receiverEmails, replyTitle, replyContent);
+
+        // 답장 이메일 발송
+        return sendEmail(replyDto, senderId);
     }
 }
