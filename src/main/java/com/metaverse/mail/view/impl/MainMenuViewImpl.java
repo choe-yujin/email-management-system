@@ -187,14 +187,14 @@ public class MainMenuViewImpl implements MainMenuView {
         consoleHelper.displayHeader("📩 메일 관리 시스템 (Main)");
         System.out.println("1. 메일 작성");
         System.out.println("2. 받은 메일함");
-        System.out.println("3. 보낸 메일함");
-        System.out.println("4. 메일 검색");
-        System.out.println("5. 휴지통");
-        System.out.println("6. 회원 수정");
-        System.out.println("7. 로그아웃");
+        //System.out.println("3. 보낸 메일함");
+        System.out.println("3. 메일 검색");
+        //System.out.println("5. 휴지통");
+        System.out.println("4. 회원 수정");
+        System.out.println("5. 로그아웃");
         consoleHelper.displayDivider();
 
-        int choice = consoleHelper.getIntInput("원하는 기능을 선택하세요 (1-7): ", 1, 7);
+        int choice = consoleHelper.getIntInput("원하는 기능을 선택하세요 (1-5): ", 1, 5);
 
         switch (choice) {
             case 1:
@@ -207,20 +207,20 @@ public class MainMenuViewImpl implements MainMenuView {
                 InboxView inboxView = createInboxView();
                 inboxView.showInbox();
                 break;
+//            case 3:
+//                // 보낸 메일함 (팀원 C가 구현)
+//                System.out.println("[스켈톤] 보낸 메일함 뷰는 팀원 C가 구현할 예정입니다.");
+//                break;
             case 3:
-                // 보낸 메일함 (팀원 C가 구현)
-                System.out.println("[스켈톤] 보낸 메일함 뷰는 팀원 C가 구현할 예정입니다.");
-                break;
-            case 4:
                 // 메일 검색
                 SearchView searchView = createSearchView();
                 searchView.showSearchForm();
                 break;
-            case 5:
-                // 휴지통 (팀원 C가 구현)
-                System.out.println("[스켈톤] 휴지통 뷰는 팀원 C가 구현할 예정입니다.");
-                break;
-            case 6:
+//            case 5:
+//                // 휴지통 (팀원 C가 구현)
+//                System.out.println("[스켈톤] 휴지통 뷰는 팀원 C가 구현할 예정입니다.");
+//                break;
+            case 4:
                 // 회원 수정 (팀원 A가 구현)
                 UserDao userDao = new UserDaoImpl(connection); // UserDao 객체 생성
                 UserService userService = new UserServiceImpl(userDao); // UserService 객체 생성
@@ -229,7 +229,7 @@ public class MainMenuViewImpl implements MainMenuView {
                 // ProfileViewImpl 객체 생성 시 필요한 의존성 주입
                 ProfileViewImpl profileView = new ProfileViewImpl(consoleHelper, userService, loginView);
                 profileView.showProfileManagement(); // 프로필 관리 화면 표시
-            case 7:
+            case 5:
                 session.logout();
                 System.out.println("→ 로그아웃 되었습니다.");
                 break;
