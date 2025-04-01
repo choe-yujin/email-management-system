@@ -108,10 +108,11 @@ public class InboxViewImpl implements InboxView {
 
         for (int i = 0; i < emails.size(); i++) {
             ReceivedEmailDto email = emails.get(i);
+            String readStatus = email.isRead() ? "[읽음]" : "[미확인]";
             String dateStr = email.getSentDate().format(dateFormatter);
 
-            System.out.printf("%d. %s - \"%s\" (%s)\n",
-                    i + 1, email.getSenderName(),
+            System.out.printf("%d. %s %s - \"%s\" (%s)\n",
+                    i + 1, readStatus, email.getSenderName(),
                     email.getTitle(), dateStr);
         }
 
