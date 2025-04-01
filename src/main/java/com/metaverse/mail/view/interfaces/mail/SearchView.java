@@ -1,6 +1,9 @@
 package com.metaverse.mail.view.interfaces.mail;
 
 import com.metaverse.mail.dto.mail.EmailSearchDto;
+import com.metaverse.mail.dto.mail.ReceivedEmailSearchDto;
+import com.metaverse.mail.dto.mail.SentEmailSearchDto;
+
 import java.util.List;
 
 public interface SearchView {
@@ -9,13 +12,11 @@ public interface SearchView {
      */
     void showSearchForm();
 
-    /**
-     * 검색 결과 표시
-     *
-     * @param keyword 검색어
-     * @param results 검색 결과 리스트
-     */
-    void showSearchResults(String keyword, List<EmailSearchDto> results);
+    // 수신메일 검색 결과 표시를 위한 메서드
+    void showReceivedEmailSearchResults(String keyword, List<ReceivedEmailSearchDto> results);
+
+    // 발신메일 검색 결과 표시를 위한 메서드
+    void showSentEmailSearchResults(String keyword, List<SentEmailSearchDto> results);
 
     /**
      * 특정 이메일 상세 정보 표시
