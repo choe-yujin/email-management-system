@@ -53,14 +53,15 @@ public interface UserDao {
 
     /**
      * 사용자 정보 수정
-     * 
+     *
      * 데이터베이스에 저장된 사용자 정보를 업데이트합니다.
      * 프로필 수정이나 비밀번호 변경 시 호출됩니다.
      *
-     * @param user 수정할 사용자 정보가 담긴 객체
+     * @param nickname 수정할 사용자 닉네임, newPassword 새로 변경할 사용자 비밀번호
      * @return 수정 성공 여부(true: 성공, false: 실패)
      */
-    boolean update(User user);
+    boolean updateNickname(int userIdx, String nickname);
+    boolean updatePassword(int userIdx, String newPassword);
 
     /**
      * 사용자 상태 변경

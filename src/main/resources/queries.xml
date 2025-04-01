@@ -27,12 +27,21 @@
         VALUES (?, ?, ?, ?, NOW())
     </query>
 
-    <query id="updateUser">
+    <query id="updateNickname">
         <!-- 사용자 정보를 수정하는 쿼리 (프로필 수정) -->
         <!-- 매개변수: email_pwd(String), nickname(String), status(char), idx(int) -->
         <!-- 구현 필요 -->
         UPDATE USER
-        SET email_pwd = ?, nickname = ?, status = ?, updated_at = NOW()
+        SET nickname = ?, updated_at = NOW()
+        WHERE idx = ?
+    </query>
+
+    <query id="updatePassword">
+        <!-- 사용자 정보를 수정하는 쿼리 (프로필 수정) -->
+        <!-- 매개변수: email_pwd(String), nickname(String), status(char), idx(int) -->
+        <!-- 구현 필요 -->
+        UPDATE USER
+        SET email_pwd = ?, updated_at = NOW()
         WHERE idx = ?
     </query>
 
