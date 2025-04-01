@@ -3,6 +3,8 @@ package com.metaverse.mail.view.impl.mail;
 import com.metaverse.mail.common.ConsoleHelper;
 import com.metaverse.mail.common.Session;
 import com.metaverse.mail.dto.mail.EmailSearchDto;
+import com.metaverse.mail.dto.mail.ReceivedEmailSearchDto;
+import com.metaverse.mail.dto.mail.SentEmailSearchDto;
 import com.metaverse.mail.service.interfaces.EmailService;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
 import com.metaverse.mail.view.interfaces.mail.SearchView;
@@ -54,54 +56,45 @@ public class SearchViewImpl implements SearchView {
     @Override
     public void showSearchForm() {
         // 헤더 표시
-        consoleHelper.displayHeader("🔍 메일 검색");
+        consoleHelper.displayHeader("🔍 받은메일함 검색");
 
         // 검색어 입력 받기
-        String keyword = consoleHelper.getStringInput("검색할 키워드 입력: ");
+        String keyword = consoleHelper.getStringInput("검색할 키워드 입력(Enter: 뒤로가기): ");
 
         if (keyword == null || keyword.trim().isEmpty()) {
-            System.out.println("→ 검색어를 입력해주세요.");
             return;
         }
 
-        // 검색 실행
-        List<EmailSearchDto> results = emailService.searchEmails(keyword, Session.getInstance().getCurrentUserId());
+        // 수신메일만 검색 실행
+        List<ReceivedEmailSearchDto> results = emailService.searchReceivedEmails(keyword, Session.getInstance().getCurrentUserId());
 
         // 검색 결과 표시
         if (results.isEmpty()) {
             showNoSearchResults(keyword);
         } else {
-            showSearchResults(keyword, results);
+            showReceivedEmailSearchResults(keyword, results);
         }
     }
 
-    /**
-     * 검색 결과 표시
-     *
-     * @param keyword 검색어
-     * @param results 검색 결과 리스트
-     */
     @Override
-    public void showSearchResults(String keyword, List<EmailSearchDto> results) {
-        consoleHelper.displayHeader("🔍 메일 검색");
+    public void showReceivedEmailSearchResults(String keyword, List<ReceivedEmailSearchDto> results) {
+        consoleHelper.displayHeader("🔍 받은메일함 검색");
         System.out.println("검색할 키워드 입력: \"" + keyword + "\"");
         consoleHelper.displayDivider();
 
         System.out.println("검색 결과:");
         int index = 1;
-        for (EmailSearchDto email : results) {
+        for (ReceivedEmailSearchDto email : results) {
             String dateStr = email.getSentDate().format(dateFormatter);
+            String readStatus = email.isRead() ? "[읽음]" : "[미확인]";
 
             // 발신자 이름이 비어있는 경우 "알 수 없음"으로 표시
-            String personName = email.getPersonName();
-            if (personName == null || personName.trim().isEmpty()) {
-                personName = "알 수 없음";
+            String senderName = email.getSenderName();
+            if (senderName == null || senderName.trim().isEmpty()) {
+                senderName = "알 수 없음";
             }
 
-            // 이메일 유형 표시
-            String emailTypeStr = " [" + email.getEmailType() + "] ";
-
-            System.out.println(index + ". " + emailTypeStr + personName + " - \"" +
+            System.out.println(index + ". " + readStatus + " " + senderName + " - \"" +
                     email.getTitle() + "\" (" + dateStr + ")");
             index++;
         }
@@ -109,13 +102,17 @@ public class SearchViewImpl implements SearchView {
         consoleHelper.displayDivider();
 
         // 이메일 선택 또는 뒤로 가기
-        int choice = consoleHelper.getIntInput("→ 조회할 메일 번호 입력 (0: 뒤로 가기): ", 0, results.size());
+        int choice = consoleHelper.getIntInput("조회할 메일 번호 입력 (0: 뒤로 가기): ", 0, results.size());
 
         if (choice > 0) {
             // 선택한 이메일 상세 정보 표시
-            EmailSearchDto selected = results.get(choice - 1);
-            showEmailDetails(selected.getEmailId(), selected.getEmailType());
+            ReceivedEmailSearchDto selected = results.get(choice - 1);
+            inboxView.showEmailDetails(selected.getEmailId());
         }
+    }
+
+    @Override
+    public void showSentEmailSearchResults(String keyword, List<SentEmailSearchDto> results) {
     }
 
     /**
@@ -126,12 +123,11 @@ public class SearchViewImpl implements SearchView {
      */
     @Override
     public void showEmailDetails(int emailId, String emailType) {
-        // InboxView를 사용하여 이메일 상세 정보 표시
-        if ("수신".equals(emailType)) {
-            // EmailService를 직접 호출하여 ReceivedEmailDto를 얻고
-            // InboxView의 showEmailDetail 호출
+        // 이메일 유형에 따라 다른 처리
+        if (emailType.contains("수신")) {
+            // 수신 이메일인 경우 InboxView를 사용하여 상세 정보 표시
             int userId = Session.getInstance().getCurrentUserId();
-            inboxView.showEmailDetail(emailService.getEmailDetails(emailId, userId));
+            inboxView.showEmailDetails(emailId);
         } else {
             // 발신 이메일인 경우 아직 기능이 구현되지 않았으므로 안내 메시지 표시
             System.out.println("→ 보낸 메일 상세 보기는 아직 구현되지 않았습니다.");

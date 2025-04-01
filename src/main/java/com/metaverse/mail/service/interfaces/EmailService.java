@@ -1,8 +1,6 @@
 package com.metaverse.mail.service.interfaces;
 
-import com.metaverse.mail.dto.mail.EmailComposeDto;
-import com.metaverse.mail.dto.mail.ReceivedEmailDto;
-import com.metaverse.mail.dto.mail.EmailSearchDto;
+import com.metaverse.mail.dto.mail.*;
 
 import java.util.List;
 
@@ -74,23 +72,13 @@ public interface EmailService {
      */
     ReceivedEmailDto getEmailDetails(int emailId, int userId);
 
-    /**
-     * 키워드로 이메일 검색
-     * 
-     * 제목이나 내용에 특정 키워드가 포함된 이메일을 검색합니다.
-     * 발신 및 수신 이메일 모두에서 검색이 수행됩니다.
-     * 
-     * 주요 처리 내용:
-     *   검색 키워드 유효성 검사
-     *   제목/내용 기반 검색
-     *   발신/수신 이메일 통합
-     *   검색 결과 DTO 변환 및 정렬
-     * 
-     * @param keyword 검색 키워드
-     * @param userId 사용자 ID
-     * @return 검색된 이메일 목록
-     */
-    List<EmailSearchDto> searchEmails(String keyword, int userId);
+
+    // 검색 관련 메서드 분리/받은 메일
+    List<ReceivedEmailSearchDto> searchReceivedEmails(String keyword, int userId);
+
+    // 검색 관련 메서드 분리/보낸 메일
+    List<SentEmailSearchDto> searchSentEmails(String keyword, int userId);
+
 
     /**
      * 이메일에 답장

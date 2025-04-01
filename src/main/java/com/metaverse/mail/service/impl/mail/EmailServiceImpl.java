@@ -4,9 +4,8 @@ import com.metaverse.mail.common.JDBCConnection;
 import com.metaverse.mail.dao.interfaces.EmailDao;
 import com.metaverse.mail.dao.interfaces.EmailLinkDao;
 import com.metaverse.mail.dao.interfaces.UserDao;
-import com.metaverse.mail.dto.mail.EmailComposeDto;
-import com.metaverse.mail.dto.mail.EmailSearchDto;
-import com.metaverse.mail.dto.mail.ReceivedEmailDto;
+import com.metaverse.mail.dto.inbox.SentEmailDto;
+import com.metaverse.mail.dto.mail.*;
 import com.metaverse.mail.model.Email;
 import com.metaverse.mail.model.EmailLink;
 import com.metaverse.mail.model.User;
@@ -15,10 +14,7 @@ import com.metaverse.mail.service.interfaces.EmailService;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class EmailServiceImpl implements EmailService {
@@ -261,85 +257,54 @@ public class EmailServiceImpl implements EmailService {
         );
     }
 
-    /**
-     * 키워드로 이메일 검색
-     *
-     * 제목이나 내용에 특정 키워드가 포함된 이메일을 검색합니다.
-     * 발신 및 수신 이메일 모두에서 검색이 수행됩니다.
-     *
-     * 주요 처리 내용:
-     * 검색 키워드 유효성 검사
-     * 제목/내용 기반 검색
-     * 발신/수신 이메일 통합
-     * 검색 결과 DTO 변환 및 정렬
-     *
-     * @param keyword 검색 키워드
-     * @param userId  사용자 ID
-     * @return 검색된 이메일 목록
-     */
     @Override
-    public List<EmailSearchDto> searchEmails(String keyword, int userId) {
-        // 입력값 유효성 검사
-        if (keyword == null || keyword.trim().isEmpty() || userId <= 0) {
+    public List<ReceivedEmailSearchDto> searchReceivedEmails(String keyword, int userId) {
+        if (keyword == null || keyword.trim().isEmpty()) {
             return new ArrayList<>();
         }
 
-        // 이메일 검색
-        List<Email> emails = emailDao.searchEmails(keyword, userId);
+        // DAO를 통해 수신 이메일만 검색
+        List<Email> receivedEmails = emailDao.searchReceivedEmails(keyword, userId);
+        List<ReceivedEmailSearchDto> results = new ArrayList<>();
 
-        // 검색 결과 변환
-        List<EmailSearchDto> results = new ArrayList<>();
-
-        for (Email email : emails) {
-            // 이메일에 대한 추가 정보 조회
-            String personName = "";
-            String emailType = "";
-            boolean isRead = false;
-
-            // ResultSet에서 추가 정보를 가져올 수 있어야 하지만,
-            // 현재 구현에서는 이메일 객체에 이 정보가 없으므로 별도로 조회 필요
-            // 실제 구현에서는 DAO에서 이 정보를 함께 반환하도록 수정하는 것이 좋음
-
-            // 임시 구현 - ResultSet에서 이 정보를 함께 가져오도록 수정해야 함
+        for (Email email : receivedEmails) {
             User sender = userDao.findById(email.getSenderId());
+            if (sender == null) continue;
 
-            if (sender != null) {
-                personName = sender.getNickname();
-            }
-
-            // 발신/수신 여부와 읽음 상태 확인 로직
+            // 이메일 링크 정보로 읽음 상태 확인
             List<EmailLink> links = emailLinkDao.getLinksByReceiverId(userId)
                     .stream()
                     .filter(link -> link.getEmailIdx() == email.getEmailIdx())
-                    .collect(Collectors.toList());
+                    .toList();
 
+            boolean isRead = false;
             if (!links.isEmpty()) {
-                // 받은 메일인 경우
-                emailType = "수신함";
                 isRead = links.get(0).getIsReaded() == 'Y';
-            } else {
-                // 보낸 메일인 경우
-                emailType = "발신함";
-                isRead = true; // 보낸 메일은 항상 읽음 상태
             }
 
-            // DTO 생성 및 추가
-            EmailSearchDto dto = new EmailSearchDto(
-                    email.getEmailIdx(),
-                    email.getTitle(),
-                    personName,
-                    emailType,
-                    isRead,
-                    email.getCreatedAt()
-            );
+            // ReceivedEmailSearchDto 생성
+            ReceivedEmailSearchDto searchResult = new ReceivedEmailSearchDto();
+            // 기본 정보 설정
+            searchResult.setEmailId(email.getEmailIdx());
+            searchResult.setTitle(email.getTitle());
+            searchResult.setSentDate(email.getCreatedAt());
+            // 수신메일 특화 정보 설정
+            searchResult.setSenderName(sender.getNickname());
+            searchResult.setSenderEmail(sender.getEmailId());
+            searchResult.setRead(isRead);
 
-            results.add(dto);
+            results.add(searchResult);
         }
 
-        // 최신 메일 기준으로 정렬
+        // 날짜 기준 내림차순 정렬
         return results.stream()
-                .sorted(Comparator.comparing(EmailSearchDto::getSentDate).reversed())
+                .sorted(Comparator.comparing(ReceivedEmailSearchDto::getSentDate).reversed())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SentEmailSearchDto> searchSentEmails(String keyword, int userId) {
+        return List.of();
     }
 
     /**

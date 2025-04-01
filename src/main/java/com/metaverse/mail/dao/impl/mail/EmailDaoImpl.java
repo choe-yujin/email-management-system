@@ -172,36 +172,23 @@ public class EmailDaoImpl implements EmailDao {
         return emails;
     }
 
-    /**
-     * 키워드로 이메일 검색
-     *
-     * 제목이나 내용에 특정 키워드가 포함된 이메일을 검색합니다.
-     * 이메일 검색 기능 구현 시 호출됩니다.
-     *
-     * @param keyword 검색 키워드
-     * @param userId 사용자 ID (발신/수신 이메일 모두 검색)
-     * @return 검색된 이메일 목록
-     */
     @Override
-    public List<Email> searchEmails(String keyword, int userId) {
-        String query = QueryUtil.getQuery("searchEmailsByKeyword");
+    public List<Email> searchReceivedEmails(String keyword, int receiverId) {
+        String query = QueryUtil.getQuery("searchReceivedEmailsByKeyword");
         List<Email> emails = new ArrayList<>();
 
         // 검색 키워드에 '%' 와일드카드 추가
         String searchPattern = "%" + keyword + "%";
 
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            // 쿼리 파라미터 설정
-            ps.setInt(1, userId);                // sender_id = ?
-            ps.setString(2, searchPattern);      // title LIKE ?
-            ps.setString(3, searchPattern);      // body LIKE ?
+            // 파라미터 설정 - 수신 이메일만 검색
+            ps.setInt(1, receiverId);           // receiver_id = ?
+            ps.setString(2, searchPattern);     // title LIKE ?
+            ps.setString(3, searchPattern);     // body LIKE ?
+            ps.setString(4, searchPattern);     // sender_name LIKE ?
+            ps.setString(5, searchPattern);     // sender_email LIKE ?
 
-            ps.setInt(4, userId);                // receiver_id = ?
-            ps.setString(5, searchPattern);      // title LIKE ?
-            ps.setString(6, searchPattern);      // body LIKE ?
-            ps.setString(7, searchPattern);      // sender_name LIKE ?
-            ps.setString(8, searchPattern);      // sender_email LIKE ?
-
+            // 결과 처리
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Email email = new Email();
@@ -210,32 +197,25 @@ public class EmailDaoImpl implements EmailDao {
                     email.setTitle(rs.getString("title"));
                     email.setBody(rs.getString("body"));
 
-                    // 메타데이터 저장
                     Timestamp createdAt = rs.getTimestamp("created_at");
                     if (createdAt != null) {
                         email.setCreatedAt(createdAt.toLocalDateTime());
-                    }
-
-                    // 추가 정보 처리 (ResultSet에서 이러한 열이 존재한다고 가정)
-                    try {
-                        // sender_name 열이 결과셋에 있는지 확인하고 처리
-                        String senderName = rs.getString("person_name");
-                        if (senderName != null) {
-                        }
-                    } catch (SQLException e) {
-                        // sender_name 열이 없는 경우 예외 처리
-                        // 이 경우 EmailServiceImpl에서 userDao.findById로 처리
                     }
 
                     emails.add(email);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("이메일 검색 실패: " + e.getMessage());
+            System.err.println("수신 이메일 검색 실패: " + e.getMessage());
             e.printStackTrace();
         }
 
         return emails;
+    }
+
+    @Override
+    public List<Email> searchSentEmails(String keyword, int senderId) {
+        return List.of();
     }
 
 
