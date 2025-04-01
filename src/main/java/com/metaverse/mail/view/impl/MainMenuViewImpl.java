@@ -21,6 +21,7 @@ import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
 import com.metaverse.mail.view.impl.mail.SearchViewImpl;
 import com.metaverse.mail.view.impl.user.LoginViewImpl;
 import com.metaverse.mail.view.impl.mail.InboxViewImpl;
+import com.metaverse.mail.view.impl.user.ProfileViewImpl;
 import com.metaverse.mail.view.impl.user.RegisterViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
 import com.metaverse.mail.view.interfaces.mail.ComposeView;
@@ -221,8 +222,13 @@ public class MainMenuViewImpl implements MainMenuView {
                 break;
             case 6:
                 // 회원 수정 (팀원 A가 구현)
-                System.out.println("[스켈톤] 회원 수정 뷰는 팀원 A가 구현할 예정입니다.");
-                break;
+                UserDao userDao = new UserDaoImpl(connection); // UserDao 객체 생성
+                UserService userService = new UserServiceImpl(userDao); // UserService 객체 생성
+                LoginView loginView = createLoginView(); // LoginView 객체 생성
+
+                // ProfileViewImpl 객체 생성 시 필요한 의존성 주입
+                ProfileViewImpl profileView = new ProfileViewImpl(consoleHelper, userService, loginView);
+                profileView.showProfileManagement(); // 프로필 관리 화면 표시
             case 7:
                 session.logout();
                 System.out.println("→ 로그아웃 되었습니다.");
