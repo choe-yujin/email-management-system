@@ -22,7 +22,14 @@ public interface InboxView {
      * @param email 이메일 DTO
      */
     void showEmailDetail(ReceivedEmailDto email);
-    
+
+    /**
+     * 이메일 ID로 메일 상세 내용 표시
+     *
+     * @param emailId 이메일 ID
+     */
+    void showEmailDetails(int emailId);
+
     /**
      * 이메일 읽음 표시 결과
      * 

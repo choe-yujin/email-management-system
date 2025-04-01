@@ -72,7 +72,9 @@ public class LoginViewImpl implements LoginView {
             // 로그인 실패 시, 다시 입력하거나 종료할 수 있는 선택지 제공
             int choice;
             do {
-                choice = consoleHelper.getIntInput("1. 다시 입력하기\n2. 종료\n→ 선택 (1-2): ", 1, 2);
+                System.out.println("1. 다시 입력하기");
+                System.out.println("2. 종료");
+                choice = consoleHelper.getIntInput("선택 (1-2): ", 1, 2);
             } while (choice != 1 && choice != 2); // 잘못된 선택지 입력 시 반복
 
             // 종료 선택 시 로그인 화면 종료
@@ -92,7 +94,6 @@ public class LoginViewImpl implements LoginView {
     @Override
     public void showLoginFailed() {
         // 로그인 실패 시 메시지 출력
-        consoleHelper.displayHeader("→ 로그인 실패! 아이디 또는 비밀번호가 틀렸습니다.");
+        consoleHelper.displayHeader("→ 해당 계정은 탈퇴 처리된 계정이거나, 아이디 또는 비밀번호가 틀렸습니다.");
     }
-
 }

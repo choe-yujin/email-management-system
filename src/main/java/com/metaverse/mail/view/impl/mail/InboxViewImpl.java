@@ -10,6 +10,7 @@ import com.metaverse.mail.dto.mail.ReceivedEmailDto;
 import com.metaverse.mail.service.interfaces.EmailService;
 import com.metaverse.mail.service.interfaces.InboxService;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
+import com.metaverse.mail.view.interfaces.mail.ReplyView;
 
 /**
  * 받은 메일함 화면 구현 클래스
@@ -31,6 +32,9 @@ public class InboxViewImpl implements InboxView {
     /** 받은 메일함 관련 서비스 */
     private InboxService inboxService;
 
+    /** 답장 화면 */
+    private ReplyView replyView;
+
     /** 사용자 세션 */
     private Session session;
 
@@ -49,6 +53,7 @@ public class InboxViewImpl implements InboxView {
         this.consoleHelper = new ConsoleHelper(scanner);
         this.emailService = emailService;
         this.inboxService = inboxService;
+        this.replyView = new ReplyViewImpl(scanner, emailService); // 이 줄 추가
         this.session = Session.getInstance();
     }
 
@@ -103,11 +108,10 @@ public class InboxViewImpl implements InboxView {
 
         for (int i = 0; i < emails.size(); i++) {
             ReceivedEmailDto email = emails.get(i);
-            String readStatus = email.isRead() ? "[읽음]" : "[미확인]";
             String dateStr = email.getSentDate().format(dateFormatter);
 
-            System.out.printf("%d. %s %s - \"%s\" (%s)\n",
-                    i + 1, readStatus, email.getSenderName(),
+            System.out.printf("%d. %s - \"%s\" (%s)\n",
+                    i + 1, email.getSenderName(),
                     email.getTitle(), dateStr);
         }
 
@@ -136,24 +140,47 @@ public class InboxViewImpl implements InboxView {
 
         int choice = consoleHelper.getIntInput("선택 (1-3): ", 1, 3);
 
-        processEmailDetailOption(email.getEmailId(), choice);
+        // emailId가 아닌 email 객체를 전달
+        processEmailDetailOption(email, choice);
     }
+
+    /**
+     * 이메일 ID로 메일 상세 내용 표시
+     *
+     * @param emailId 이메일 ID
+     */
+    @Override
+    public void showEmailDetails(int emailId) {
+        // 현재 로그인한 사용자의 ID 가져오기
+        int userId = session.getCurrentUserId();
+
+        // 선택한 이메일 상세 정보 조회
+        ReceivedEmailDto emailDetail = emailService.getEmailDetails(emailId, userId);
+
+        if (emailDetail != null) {
+            showEmailDetail(emailDetail);
+        } else {
+            System.out.println("→ 이메일을 조회할 수 없습니다.");
+            consoleHelper.displayDivider();
+        }
+    }
+
 
     /**
      * 메일 상세 옵션 처리
      *
-     * @param emailId 이메일 ID
+     * @param email 이메일 Dto
      * @param choice 사용자 선택
      */
-    private void processEmailDetailOption(int emailId, int choice) {
+    private void processEmailDetailOption(ReceivedEmailDto email, int choice) {
         switch (choice) {
             case 1:
-                // TODO: 답장 기능 구현 (ReplyView로 연결)
-                System.out.println("답장 기능은 아직 구현되지 않았습니다.");
+                // 답장 화면으로 이동
+                replyView.showReplyForm(email);
                 break;
             case 2:
                 // 이메일 삭제 기능 구현
-                deleteEmail(emailId);
+                deleteEmail(email.getEmailId());
                 break;
             case 3:
                 // 메일함으로 돌아가기

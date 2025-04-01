@@ -27,12 +27,21 @@
         VALUES (?, ?, ?, ?, NOW())
     </query>
 
-    <query id="updateUser">
+    <query id="updateNickname">
         <!-- 사용자 정보를 수정하는 쿼리 (프로필 수정) -->
         <!-- 매개변수: email_pwd(String), nickname(String), status(char), idx(int) -->
         <!-- 구현 필요 -->
         UPDATE USER
-        SET email_pwd = ?, nickname = ?, status = ?, updated_at = NOW()
+        SET nickname = ?, updated_at = NOW()
+        WHERE idx = ?
+    </query>
+
+    <query id="updatePassword">
+        <!-- 사용자 정보를 수정하는 쿼리 (프로필 수정) -->
+        <!-- 매개변수: email_pwd(String), nickname(String), status(char), idx(int) -->
+        <!-- 구현 필요 -->
+        UPDATE USER
+        SET email_pwd = ?, updated_at = NOW()
         WHERE idx = ?
     </query>
 
@@ -77,10 +86,53 @@
         created_at DESC
     </query>
 
+    <!-- queries.xml 파일에 아래 쿼리 추가 -->
+
     <query id="searchEmailsByKeyword">
-        <!-- 키워드로 이메일을 검색하는 쿼리 (제목, 내용, 발신자 포함) -->
-        <!-- 매개변수: keyword(String), userId(int) -->
-        <!-- 구현 필요 -->
+        <!-- 필드명을 명확하게 지정하고 있는지 확인하세요 -->
+        <!-- e.sender_id로 명시적으로 지정해야 합니다 -->
+        SELECT
+        e.email_idx,
+        e.sender_id, <!-- 이 필드가 명시적으로 있는지 확인 -->
+        e.title,
+        e.body,
+        e.created_at,
+        u.nickname AS person_name,
+        u.email_id AS person_email,
+        'sent' AS email_type,
+        'Y' AS is_read
+        FROM
+        EMAIL e
+        JOIN
+        USER u ON e.sender_id = u.idx
+        WHERE
+        e.sender_id = ? AND
+        (e.title LIKE ? OR e.body LIKE ?)
+
+        UNION
+
+        SELECT
+        e.email_idx,
+        e.sender_id, <!-- 이 필드가 명시적으로 있는지 확인 -->
+        e.title,
+        e.body,
+        e.created_at,
+        u.nickname AS person_name,
+        u.email_id AS person_email,
+        'received' AS email_type,
+        el.is_readed
+        FROM
+        EMAIL_LINK el
+        JOIN
+        EMAIL e ON el.email_idx = e.email_idx
+        JOIN
+        USER u ON e.sender_id = u.idx
+        WHERE
+        el.receiver_id = ? AND
+        el.is_deleted = 'N' AND
+        (e.title LIKE ? OR e.body LIKE ? OR u.nickname LIKE ? OR u.email_id LIKE ?)
+
+        ORDER BY created_at DESC
     </query>
 
     <!-- 이메일 링크 관련 쿼리 (개발자 B, C 공동 담당) -->

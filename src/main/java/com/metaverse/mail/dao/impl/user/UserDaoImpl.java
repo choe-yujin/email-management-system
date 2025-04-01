@@ -1,5 +1,6 @@
 package com.metaverse.mail.dao.impl.user;
 
+import com.metaverse.mail.common.Session;
 import com.metaverse.mail.dao.interfaces.UserDao;
 import com.metaverse.mail.model.User;
 import com.metaverse.mail.common.QueryUtil;
@@ -87,21 +88,33 @@ public class UserDaoImpl implements UserDao {
         return false;  // 추가 실패
     }
 
-    /*
-     * 사용자 정보 수정
-     * 기존 사용자 정보를 업데이트하는 메서드 (정보 수정)
-     */
     @Override
-    public boolean update(User user) {
-        String query = QueryUtil.getQuery("updateUser"); // XML에서 쿼리 가져오기
+    public boolean updateNickname(int userIdx, String nickname) {
+        String query = QueryUtil.getQuery("updateNickname"); // XML에서 쿼리 가져오기
 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setString(1, user.getEmailPwd());  // 비밀번호 설정
-            pstmt.setString(2, user.getNickname());  // 닉네임 설정
-            pstmt.setString(3, String.valueOf(user.getStatus()));  // 상태 설정
-            pstmt.setInt(4, user.getIdx());  // 사용자 ID 설정
-            pstmt.executeUpdate();  // 데이터베이스에서 사용자 정보 수정
-            return true;  // 성공적으로 수정됨
+            pstmt.setString(1, nickname);  // 새 닉네임 설정
+            pstmt.setInt(2, userIdx);  // userIdx는 사용자 식별자(ID)
+            int updatedRows = pstmt.executeUpdate(); // 실행된 업데이트된 행의 수
+            return updatedRows > 0; // 수정된 행이 있으면 성공
+
+        } catch (SQLException e) {
+            e.printStackTrace();  // 예외 처리 (로깅 추가 가능)
+        }
+
+        return false;  // 수정 실패
+    }
+
+    @Override
+    public boolean updatePassword(int userIdx, String newPassword) {
+        String query = QueryUtil.getQuery("updatePassword"); // XML에서 쿼리 가져오기
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, newPassword);  // 새 비밀번호 설정
+            pstmt.setInt(2, userIdx);  // userIdx는 사용자 식별자(ID)
+            int updatedRows = pstmt.executeUpdate();
+            return updatedRows > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();  // 예외 처리 (로깅 추가 가능)
         }
@@ -120,8 +133,9 @@ public class UserDaoImpl implements UserDao {
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, String.valueOf(status));  // 상태 설정
             pstmt.setInt(2, userId);  // 사용자 ID 설정
-            pstmt.executeUpdate();  // 데이터베이스에서 사용자 상태 변경
-            return true;  // 성공적으로 상태 변경됨
+            int updatedRows = pstmt.executeUpdate(); // 실행된 업데이트된 행의 수
+            return updatedRows > 0; // 수정된 행이 있으면 성공
+
         } catch (SQLException e) {
             e.printStackTrace();  // 예외 처리 (로깅 추가 가능)
         }

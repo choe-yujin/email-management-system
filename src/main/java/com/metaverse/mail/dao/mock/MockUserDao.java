@@ -31,7 +31,11 @@ public class MockUserDao implements UserDao {
     }
 
     @Override
-    public boolean update(User user) {
+    public boolean updateNickname(int userIdx, String nickname) {
+        return false;
+    }
+    @Override
+    public boolean updatePassword(int userIdx, String nickname) {
         return false;
     }
 

@@ -92,7 +92,7 @@ public class ComposeViewImpl implements ComposeView {
         return Arrays.stream(receiversInput.split(","))
                 .map(String::trim)
                 .filter(email -> !email.isEmpty())
-                .map(email -> ensureEmailDomain(email))
+                .map(this::ensureEmailDomain)
                 .collect(Collectors.toList());
     }
 
