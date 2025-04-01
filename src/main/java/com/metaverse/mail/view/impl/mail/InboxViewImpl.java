@@ -108,11 +108,10 @@ public class InboxViewImpl implements InboxView {
 
         for (int i = 0; i < emails.size(); i++) {
             ReceivedEmailDto email = emails.get(i);
-            String readStatus = email.isRead() ? "[읽음]" : "[미확인]";
             String dateStr = email.getSentDate().format(dateFormatter);
 
-            System.out.printf("%d. %s %s - \"%s\" (%s)\n",
-                    i + 1, readStatus, email.getSenderName(),
+            System.out.printf("%d. %s - \"%s\" (%s)\n",
+                    i + 1, email.getSenderName(),
                     email.getTitle(), dateStr);
         }
 
@@ -143,6 +142,27 @@ public class InboxViewImpl implements InboxView {
 
         // emailId가 아닌 email 객체를 전달
         processEmailDetailOption(email, choice);
+    }
+
+    /**
+     * 이메일 ID로 메일 상세 내용 표시
+     *
+     * @param emailId 이메일 ID
+     */
+    @Override
+    public void showEmailDetails(int emailId) {
+        // 현재 로그인한 사용자의 ID 가져오기
+        int userId = session.getCurrentUserId();
+
+        // 선택한 이메일 상세 정보 조회
+        ReceivedEmailDto emailDetail = emailService.getEmailDetails(emailId, userId);
+
+        if (emailDetail != null) {
+            showEmailDetail(emailDetail);
+        } else {
+            System.out.println("→ 이메일을 조회할 수 없습니다.");
+            consoleHelper.displayDivider();
+        }
     }
 
 
