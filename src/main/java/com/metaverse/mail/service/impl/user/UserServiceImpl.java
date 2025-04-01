@@ -31,6 +31,11 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
+        //탈퇴 계정인지 확인
+        if (user.getStatus() == 'D') { // 'D(탈퇴 상태)'
+            return null; // 탈퇴된 계정은 null을 반환하여 로그인 실패 처리
+        }
+
         // 사용자가 존재하면, 비밀번호 일치 여부를 검증
         if (password.equals(user.getEmailPwd())) {
             return user; // 비밀번호가 맞으면 사용자 객체 반환
