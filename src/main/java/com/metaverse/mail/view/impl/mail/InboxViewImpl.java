@@ -10,6 +10,7 @@ import com.metaverse.mail.dto.mail.ReceivedEmailDto;
 import com.metaverse.mail.service.interfaces.EmailService;
 import com.metaverse.mail.service.interfaces.InboxService;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
+import com.metaverse.mail.view.interfaces.mail.ReplyView;
 
 /**
  * 받은 메일함 화면 구현 클래스
@@ -31,6 +32,9 @@ public class InboxViewImpl implements InboxView {
     /** 받은 메일함 관련 서비스 */
     private InboxService inboxService;
 
+    /** 답장 화면 */
+    private ReplyView replyView;
+
     /** 사용자 세션 */
     private Session session;
 
@@ -49,6 +53,7 @@ public class InboxViewImpl implements InboxView {
         this.consoleHelper = new ConsoleHelper(scanner);
         this.emailService = emailService;
         this.inboxService = inboxService;
+        this.replyView = new ReplyViewImpl(scanner, emailService); // 이 줄 추가
         this.session = Session.getInstance();
     }
 
@@ -136,24 +141,26 @@ public class InboxViewImpl implements InboxView {
 
         int choice = consoleHelper.getIntInput("선택 (1-3): ", 1, 3);
 
-        processEmailDetailOption(email.getEmailId(), choice);
+        // emailId가 아닌 email 객체를 전달
+        processEmailDetailOption(email, choice);
     }
+
 
     /**
      * 메일 상세 옵션 처리
      *
-     * @param emailId 이메일 ID
+     * @param email 이메일 Dto
      * @param choice 사용자 선택
      */
-    private void processEmailDetailOption(int emailId, int choice) {
+    private void processEmailDetailOption(ReceivedEmailDto email, int choice) {
         switch (choice) {
             case 1:
-                // TODO: 답장 기능 구현 (ReplyView로 연결)
-                System.out.println("답장 기능은 아직 구현되지 않았습니다.");
+                // 답장 화면으로 이동
+                replyView.showReplyForm(email);
                 break;
             case 2:
                 // 이메일 삭제 기능 구현
-                deleteEmail(emailId);
+                deleteEmail(email.getEmailId());
                 break;
             case 3:
                 // 메일함으로 돌아가기
