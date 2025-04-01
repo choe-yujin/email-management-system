@@ -18,11 +18,13 @@ import com.metaverse.mail.service.interfaces.EmailService;
 import com.metaverse.mail.service.interfaces.InboxService;
 import com.metaverse.mail.service.interfaces.UserService;
 import com.metaverse.mail.view.impl.mail.ComposeViewImpl;
+import com.metaverse.mail.view.impl.mail.SearchViewImpl;
 import com.metaverse.mail.view.impl.user.LoginViewImpl;
 import com.metaverse.mail.view.impl.mail.InboxViewImpl;
 import com.metaverse.mail.view.impl.user.RegisterViewImpl;
 import com.metaverse.mail.view.interfaces.MainMenuView;
 import com.metaverse.mail.view.interfaces.mail.ComposeView;
+import com.metaverse.mail.view.interfaces.mail.SearchView;
 import com.metaverse.mail.view.interfaces.user.LoginView;
 import com.metaverse.mail.view.interfaces.mail.InboxView;
 import com.metaverse.mail.view.interfaces.user.RegisterView;
@@ -209,8 +211,9 @@ public class MainMenuViewImpl implements MainMenuView {
                 System.out.println("[스켈톤] 보낸 메일함 뷰는 팀원 C가 구현할 예정입니다.");
                 break;
             case 4:
-                // 메일 검색 (팀원 B가 구현)
-                System.out.println("[스켈톤] 메일 검색 뷰는 팀원 B가 구현할 예정입니다.");
+                // 메일 검색
+                SearchView searchView = createSearchView();
+                searchView.showSearchForm();
                 break;
             case 5:
                 // 휴지통 (팀원 C가 구현)
@@ -245,4 +248,12 @@ public class MainMenuViewImpl implements MainMenuView {
         return new InboxViewImpl(scanner, emailService, inboxService);
     }
 
+    /**
+     * 메일 검색 화면 객체 생성
+     *
+     * @return 메일 검색 화면 객체
+     */
+    private SearchView createSearchView() {
+        return new SearchViewImpl(scanner, emailService, createInboxView());
+    }
 }
