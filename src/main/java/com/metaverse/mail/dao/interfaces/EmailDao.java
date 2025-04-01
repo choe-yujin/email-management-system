@@ -50,10 +50,28 @@ public interface EmailDao {
      */
     List<Email> getEmailsBySenderId(int senderId);
 
-    // 수신 이메일 검색 전용 메서드
+    /**
+     * 키워드로 수신 이메일 검색
+     * 
+     * 특정 사용자가 받은 이메일 중에서 주어진 키워드가 포함된 이메일을 검색합니다.
+     * 메일 검색 기능 구현 시 호출됩니다.
+     *
+     * @param keyword 검색할 키워드
+     * @param receiverId 수신자 ID
+     * @return 검색된 이메일 목록
+     */
     List<Email> searchReceivedEmails(String keyword, int receiverId);
 
-    // 추후 개발을 위한 발신 이메일 검색 메서드
+    /**
+     * 키워드로 발신 이메일 검색
+     * 
+     * 특정 사용자가 보낸 이메일 중에서 주어진 키워드가 포함된 이메일을 검색합니다.
+     * 메일 검색 기능 구현 시 호출됩니다.
+     *
+     * @param keyword 검색할 키워드
+     * @param senderId 발신자 ID
+     * @return 검색된 이메일 목록
+     */
     List<Email> searchSentEmails(String keyword, int senderId);
 
     /**
