@@ -57,124 +57,78 @@ public class EmailServiceImpl implements EmailService {
      */
     @Override
     public boolean sendEmail(EmailComposeDto emailDto, int senderId) {
+        // 1. 수신자 유효성 검사
+        List<User> validReceivers = new ArrayList<>();
+        for (String receiverEmail : emailDto.getReceiverEmails()) {
+            User receiver = userDao.findByEmailId(receiverEmail);
+
+            // 수신자가 존재하고 활성 상태인 경우에만 추가
+            if (receiver != null && receiver.getStatus() != 'D') {
+                validReceivers.add(receiver);
+            } else {
+                System.out.println("→ 유효하지 않은 수신자: " + receiverEmail);
+            }
+        }
+
+        // 2. 유효한 수신자 확인
+        if (validReceivers.isEmpty()) {
+            System.out.println("→ 메일을 받을 수 있는 수신자가 없습니다.");
+            return false;
+        }
+
+        // 3. 이메일 및 이메일 링크 생성 (기존 로직 동일)
         Connection conn = null;
-        boolean autoCommit = false;
-        boolean success = false;
-
         try {
-            // 입력값 유효성 검사
-            if (emailDto.getReceiverEmails() == null || emailDto.getReceiverEmails().isEmpty() ||
-                    emailDto.getTitle() == null || emailDto.getTitle().trim().isEmpty() ||
-                    emailDto.getBody() == null) {
-                return false;
-            }
-
-            // 트랜잭션 시작을 위한 연결 획득
-            try {
-                conn = JDBCConnection.getConnection();
-                autoCommit = conn.getAutoCommit();
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                System.err.println("데이터베이스 연결 실패: " + e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
+            conn = JDBCConnection.getConnection();
+            conn.setAutoCommit(false);
 
             // 이메일 객체 생성
             Email email = new Email();
             email.setSenderId(senderId);
             email.setTitle(emailDto.getTitle());
             email.setBody(emailDto.getBody());
-            email.setStatus('Y'); // 발송 완료 상태
+            email.setStatus('Y');
             email.setCreatedAt(LocalDateTime.now());
 
             // 이메일 저장
             int emailId = emailDao.createEmail(email);
-
             if (emailId <= 0) {
-                // 이메일 생성 실패
-                System.err.println("이메일 생성 실패");
-                try {
-                    if (conn != null) conn.rollback();
-                } catch (SQLException e) {
-                    System.err.println("롤백 실패: " + e.getMessage());
-                    e.printStackTrace();
-                }
+                conn.rollback();
                 return false;
             }
 
-            // 각 수신자에 대해 처리
-            List<String> receiverEmails = emailDto.getReceiverEmails();
-            for (String receiverEmail : receiverEmails) {
-                // 수신자 존재 여부 확인
-                User receiver = userDao.findByEmailId(receiverEmail);
-
-                if (receiver == null) {
-                    // 존재하지 않는 수신자일 경우 롤백
-                    System.err.println("존재하지 않는 수신자: " + receiverEmail);
-                    try {
-                        conn.rollback();
-                    } catch (SQLException e) {
-                        System.err.println("롤백 실패: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                    return false;
-                }
-
-                // 이메일과 수신자 연결
+            // 유효한 수신자에게만 이메일 링크 생성
+            for (User receiver : validReceivers) {
                 boolean linked = emailLinkDao.createEmailLink(emailId, receiver.getIdx());
-
                 if (!linked) {
-                    // 연결 실패 시 롤백
-                    System.err.println("이메일 링크 생성 실패: " + receiverEmail);
-                    try {
-                        conn.rollback();
-                    } catch (SQLException e) {
-                        System.err.println("롤백 실패: " + e.getMessage());
-                        e.printStackTrace();
-                    }
+                    conn.rollback();
                     return false;
                 }
             }
 
-            // 모든 작업 성공 시 커밋
-            try {
-                conn.commit();
-                success = true;
-            } catch (SQLException e) {
-                System.err.println("커밋 실패: " + e.getMessage());
-                e.printStackTrace();
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            if (conn != null) {
                 try {
                     conn.rollback();
                 } catch (SQLException rollbackEx) {
-                    System.err.println("롤백 실패: " + rollbackEx.getMessage());
                     rollbackEx.printStackTrace();
                 }
             }
-
-        } catch (Exception e) {
-            // 모든 예외 처리
-            System.err.println("이메일 발송 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
-            try {
-                if (conn != null) conn.rollback();
-            } catch (SQLException rollbackEx) {
-                System.err.println("롤백 실패: " + rollbackEx.getMessage());
-                rollbackEx.printStackTrace();
-            }
+            return false;
         } finally {
-            // 원래 autoCommit 설정 복원
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(autoCommit);
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                System.err.println("autoCommit 설정 복원 실패: " + e.getMessage());
-                e.printStackTrace();
             }
         }
-
-        return success;
     }
 
     /**
