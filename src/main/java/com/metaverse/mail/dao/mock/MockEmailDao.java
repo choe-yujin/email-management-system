@@ -67,27 +67,12 @@ public class MockEmailDao implements EmailDao {
     }
 
     @Override
-    public List<Email> searchEmails(String keyword, int userId) {
-        // 테스트용 검색 결과 생성
-        List<Email> searchResults = new ArrayList<>();
+    public List<Email> searchReceivedEmails(String keyword, int receiverId) {
+        return List.of();
+    }
 
-        Email email1 = new Email();
-        email1.setEmailIdx(1003);
-        email1.setSenderId(userId);
-        email1.setTitle("검색 테스트 이메일 1");
-        email1.setBody("키워드를 포함한 테스트 이메일 본문 1");
-        email1.setStatus('Y');
-
-        Email email2 = new Email();
-        email2.setEmailIdx(1004);
-        email2.setSenderId(userId);
-        email2.setTitle("검색 테스트 이메일 2");
-        email2.setBody("키워드를 포함한 테스트 이메일 본문 2");
-        email2.setStatus('Y');
-
-        searchResults.add(email1);
-        searchResults.add(email2);
-
-        return searchResults;
+    @Override
+    public List<Email> searchSentEmails(String keyword, int senderId) {
+        return List.of();
     }
 }
