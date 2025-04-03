@@ -128,6 +128,7 @@ com.metaverse.mail/
 │
 ├── common/                       # 공통 유틸리티
 │   ├── JDBCConnection.java       # DB 연결 관리
+│   ├── Constants.java            # 상수
 │   ├── QueryUtil.java            # SQL 쿼리 유틸리티
 │   ├── Session.java              # 로그인 세션 관리
 │   └── ConsoleHelper.java        # 콘솔 UI 공통 기능
@@ -144,10 +145,13 @@ com.metaverse.mail/
 │   │   ├── UserRegisterDto.java  # 회원가입 입력 DTO
 │   │   └── UserProfileDto.java   # 회원정보 DTO
 │   │
-│   ├── mail/                     # 개발자 B(유진님) 담당
-│   │   ├── EmailComposeDto.java  # 메일 작성 DTO
-│   │   ├── ReceivedEmailDto.java # 받은 메일 DTO
-│   │   └── EmailSearchDto.java   # 메일 검색 DTO
+│   ├── mail/                           # 개발자 B(유진님) 담당
+│   │   ├── EmailComposeDto.java        # 메일 작성 DTO
+│   │   ├── ReceivedEmailDto.java       # 받은 메일 DTO
+│   │   ├── EmailSearchDto.java         # 이메일 검색 결과 DTO
+│   │   ├── ReceivedEmailSearchDto.java # 수신 이메일 검색 결과 DTO
+│   │   ├── SnetEmailSearchDto.java     # 발신 이메일 검색 결과 DTO
+│   │   └── EmailSearchDto.java         # 메일 검색 DTO
 │   │
 │   └── inbox/                    # 개발자 C(효민님) 담당
 │       ├── SentEmailDto.java     # 보낸 메일 DTO
@@ -218,6 +222,7 @@ com.metaverse.mail/
 │       ├── mail/                 # 개발자 B 담당
 │       │   ├── ComposeViewImpl.java
 │       │   ├── InboxViewImpl.java
+│       │   ├── ReplyViewImpl.java
 │       │   └── SearchViewImpl.java
 │       │
 │       └── inbox/                # 개발자 C 담당
@@ -273,773 +278,177 @@ erDiagram
     EMAIL_LINK ||--o{ TRASH : "deleted_to"
 ```
 
-### 클래스 다이어그램
-```mermaid
-classDiagram
-%% 모델 클래스
-    class User {
-        -int idx
-        -String emailId
-        -String emailPwd
-        -String nickname
-        -char status
-        -LocalDateTime createdAt
-        -LocalDateTime updatedAt
-        -LocalDateTime deletedAt
-        +getters()
-        +setters()
-    }
 
-    class Email {
-        -int emailIdx
-        -int senderId
-        -String title
-        -String body
-        -char status
-        -LocalDateTime createdAt
-        +getters()
-        +setters()
-    }
-
-    class EmailLink {
-        -int linkIdx
-        -int receiverId
-        -int emailIdx
-        -char isReaded
-        -char isDeleted
-        +getters()
-        +setters()
-    }
-
-    class Trash {
-        -int trashIdx
-        -int linkId
-        -LocalDateTime deletedAt
-        -LocalDateTime expirationDate
-        -char isRestored
-        +getters()
-        +setters()
-    }
-
-%% DTO 클래스 - 사용자
-    class UserLoginDto {
-        -String emailId
-        -String password
-        +getters()
-        +setters()
-    }
-
-    class UserRegisterDto {
-        -String emailId
-        -String password
-        -String nickname
-        +getters()
-        +setters()
-    }
-
-    class UserProfileDto {
-        -String currentPassword
-        -String newPassword
-        -String nickname
-        +getters()
-        +setters()
-    }
-
-%% DTO 클래스 - 이메일
-    class EmailComposeDto {
-        -List~String~ receiverEmails
-        -String title
-        -String body
-        +getters()
-        +setters()
-    }
-
-    class ReceivedEmailDto {
-        -int emailId
-        -String senderName
-        -String senderEmail
-        -String title
-        -String body
-        -LocalDateTime sentDate
-        -boolean read
-        +getters()
-        +setters()
-    }
-
-    class EmailSearchDto {
-        -int emailId
-        -String title
-        -String personName
-        -LocalDateTime date
-        -String type
-        -boolean read
-        +getters()
-        +setters()
-    }
-
-%% DTO 클래스 - 받은/보낸 메일함
-    class SentEmailDto {
-        -int emailId
-        -List~String~ receiverNames
-        -List~String~ receiverEmails
-        -String title
-        -String body
-        -LocalDateTime sentDate
-        +getters()
-        +setters()
-    }
-
-    class TrashEmailDto {
-        -int trashId
-        -int emailId
-        -String title
-        -String personName
-        -String personEmail
-        -String emailType
-        -LocalDateTime deletedAt
-        -LocalDateTime expirationDate
-        +getters()
-        +setters()
-    }
-
-%% DAO 인터페이스
-    class UserDao {
-        <<interface>>
-        +User findById(int userId)
-        +User findByEmailId(String emailId)
-        +boolean insert(User user)
-        +boolean update(User user)
-        +boolean updateStatus(int userId, char status)
-    }
-
-    class EmailDao {
-        <<interface>>
-        +int createEmail(Email email)
-        +Email getEmailById(int emailId)
-        +List~Email~ getEmailsBySenderId(int senderId)
-        +boolean updateEmail(Email email)
-        +boolean deleteEmail(int emailId)
-        +List~Email~ searchEmails(String keyword, int userId)
-    }
-
-    class EmailLinkDao {
-        <<interface>>
-        +boolean createEmailLink(int emailId, int receiverId)
-        +EmailLink getLinkById(int linkId)
-        +List~EmailLink~ getLinksByReceiverId(int receiverId)
-        +boolean markAsRead(int linkId)
-        +boolean markAsDeleted(int linkId)
-        +boolean restoreEmail(int linkId)
-    }
-
-    class TrashDao {
-        <<interface>>
-        +int createTrashItem(int linkId)
-        +Trash getTrashById(int trashId)
-        +List~Trash~ getTrashItemsByUserId(int userId)
-        +boolean markAsRestored(int trashId)
-        +boolean deleteTrash(int trashId)
-        +List~Trash~ getExpiredTrashItems()
-    }
-
-%% 서비스 인터페이스
-    class UserService {
-        <<interface>>
-        +boolean register(UserRegisterDto userDto)
-        +User login(UserLoginDto loginDto)
-        +boolean updateProfile(UserProfileDto profileDto, int userId)
-        +boolean changePassword(String oldPassword, String newPassword, int userId)
-        +boolean deactivateAccount(int userId)
-    }
-
-    class EmailService {
-        <<interface>>
-        +boolean sendEmail(EmailComposeDto emailDto, int senderId)
-        +List~ReceivedEmailDto~ getReceivedEmails(int userId)
-        +ReceivedEmailDto getEmailDetails(int emailId, int userId)
-        +List~EmailSearchDto~ searchEmails(String keyword, int userId)
-        +boolean replyToEmail(int originalEmailId, String replyContent, int senderId)
-    }
-
-    class InboxService {
-        <<interface>>
-        +List~SentEmailDto~ getSentEmails(int userId)
-        +SentEmailDto getSentEmailDetails(int emailId)
-        +boolean deleteReceivedEmail(int emailId, int userId)
-        +boolean deleteSentEmail(int emailId)
-    }
-
-    class TrashService {
-        <<interface>>
-        +List~TrashEmailDto~ getTrashEmails(int userId)
-        +TrashEmailDto getTrashEmailDetails(int trashId)
-        +boolean restoreEmail(int trashId)
-        +boolean permanentlyDeleteEmail(int trashId)
-        +int cleanupExpiredEmails()
-    }
-
-%% 뷰 인터페이스
-    class MenuView {
-        <<interface>>
-        +void showMenu()
-        +void processUserChoice(int choice)
-    }
-
-    class UserView {
-        <<interface>>
-        +void showLoginForm()
-        +void showRegistrationForm()
-        +void showProfileManagement()
-    }
-
-    class EmailView {
-        <<interface>>
-        +void showComposeForm()
-        +void showEmailList(List emails)
-        +void showEmailDetails(Object email)
-        +void showSearchForm()
-    }
-
-    class TrashView {
-        <<interface>>
-        +void showTrashList()
-        +void showTrashDetails(TrashEmailDto email)
-    }
-
-%% 구현 클래스 - DAO
-    class UserDaoImpl {
-        -Connection conn
-        +User findById(int userId)
-        +User findByEmailId(String emailId)
-        +boolean insert(User user)
-        +boolean update(User user)
-        +boolean updateStatus(int userId, char status)
-    }
-
-    class EmailDaoImpl {
-        -Connection conn
-        +int createEmail(Email email)
-        +Email getEmailById(int emailId)
-        +List~Email~ getEmailsBySenderId(int senderId)
-        +boolean updateEmail(Email email)
-        +boolean deleteEmail(int emailId)
-        +List~Email~ searchEmails(String keyword, int userId)
-    }
-
-    class EmailLinkDaoImpl {
-        -Connection conn
-        +boolean createEmailLink(int emailId, int receiverId)
-        +EmailLink getLinkById(int linkId)
-        +List~EmailLink~ getLinksByReceiverId(int receiverId)
-        +boolean markAsRead(int linkId)
-        +boolean markAsDeleted(int linkId)
-        +boolean restoreEmail(int linkId)
-    }
-
-    class TrashDaoImpl {
-        -Connection conn
-        +int createTrashItem(int linkId)
-        +Trash getTrashById(int trashId)
-        +List~Trash~ getTrashItemsByUserId(int userId)
-        +boolean markAsRestored(int trashId)
-        +boolean deleteTrash(int trashId)
-        +List~Trash~ getExpiredTrashItems()
-    }
-
-%% 구현 클래스 - 서비스
-    class UserServiceImpl {
-        -UserDao userDao
-        +boolean register(UserRegisterDto userDto)
-        +User login(UserLoginDto loginDto)
-        +boolean updateProfile(UserProfileDto profileDto, int userId)
-        +boolean changePassword(String oldPassword, String newPassword, int userId)
-        +boolean deactivateAccount(int userId)
-        -boolean isValidEmail(String email)
-        -boolean isValidPassword(String password)
-    }
-
-    class EmailServiceImpl {
-        -EmailDao emailDao
-        -EmailLinkDao emailLinkDao
-        -UserDao userDao
-        +boolean sendEmail(EmailComposeDto emailDto, int senderId)
-        +List~ReceivedEmailDto~ getReceivedEmails(int userId)
-        +ReceivedEmailDto getEmailDetails(int emailId, int userId)
-        +List~EmailSearchDto~ searchEmails(String keyword, int userId)
-        +boolean replyToEmail(int originalEmailId, String replyContent, int senderId)
-        -Email convertToEmail(EmailComposeDto dto, int senderId)
-        -ReceivedEmailDto convertToReceivedEmailDto(Email email, User sender)
-    }
-
-    class InboxServiceImpl {
-        -EmailDao emailDao
-        -EmailLinkDao emailLinkDao
-        -UserDao userDao
-        -TrashDao trashDao
-        +List~SentEmailDto~ getSentEmails(int userId)
-        +SentEmailDto getSentEmailDetails(int emailId)
-        +boolean deleteReceivedEmail(int emailId, int userId)
-        +boolean deleteSentEmail(int emailId)
-        -SentEmailDto convertToSentEmailDto(Email email, List~User~ receivers)
-    }
-
-    class TrashServiceImpl {
-        -TrashDao trashDao
-        -EmailLinkDao emailLinkDao
-        -EmailDao emailDao
-        -UserDao userDao
-        +List~TrashEmailDto~ getTrashEmails(int userId)
-        +TrashEmailDto getTrashEmailDetails(int trashId)
-        +boolean restoreEmail(int trashId)
-        +boolean permanentlyDeleteEmail(int trashId)
-        +int cleanupExpiredEmails()
-        -TrashEmailDto convertToTrashEmailDto(Trash trash, Email email, User person)
-    }
-
-%% 구현 클래스 - 뷰
-    class MainMenuView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -Session session
-        +void showMainMenu()
-        +void showLoginMenu()
-        -void processMainMenuChoice(int choice)
-    }
-
-    class LoginView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -UserService userService
-        -Session session
-        +void showLoginForm()
-        -User authenticateUser(String emailId, String password)
-    }
-
-    class RegisterView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -UserService userService
-        +void showRegistrationForm()
-    }
-
-    class UserProfileView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -UserService userService
-        -Session session
-        +void showProfileManagement()
-        -void showNicknameUpdateForm()
-        -void showPasswordUpdateForm()
-        -void showDeactivateAccountForm()
-    }
-
-    class ComposeEmailView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -EmailService emailService
-        -Session session
-        +void showComposeForm()
-        -boolean validateReceiverEmails(List~String~ emails)
-    }
-
-    class InboxView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -EmailService emailService
-        -Session session
-        +void showReceivedEmails()
-        +void showEmailDetails(int emailId)
-        -void showReplyForm(int emailId)
-        -void processEmailOptions(int emailId, int choice)
-    }
-
-    class SearchEmailView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -EmailService emailService
-        -Session session
-        +void showSearchForm()
-        +void showSearchResults(List~EmailSearchDto~ results)
-        +void showEmailDetails(int emailId, String type)
-    }
-
-    class SentEmailView {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -InboxService inboxService
-        -Session session
-        +void showSentEmails()
-        +void showEmailDetails(int emailId)
-        -void processEmailOptions(int emailId, int choice)
-    }
-
-    class TrashViewImpl {
-        -Scanner scanner
-        -ConsoleHelper consoleHelper
-        -TrashService trashService
-        -Session session
-        +void showTrashList()
-        +void showTrashDetails(int trashId)
-        -void processTrashOptions(int trashId, int choice)
-    }
-
-%% 공통 유틸리티 클래스
-    class JDBCConnection {
-        -static Connection connection
-        +static Connection getConnection()
-        -static void loadProperties()
-        +static void closeConnection()
-    }
-
-    class QueryUtil {
-        -static Properties queries
-        +static String getQuery(String queryId)
-        -static void loadQueries()
-    }
-
-    class Session {
-        -static User currentUser
-        +static void setCurrentUser(User user)
-        +static User getCurrentUser()
-        +static boolean isLoggedIn()
-        +static void logout()
-        +static int getUserId()
-    }
-
-    class ConsoleHelper {
-        -Scanner scanner
-        +void displayHeader(String title)
-        +void displayDivider()
-        +int getIntInput(String prompt, int min, int max)
-        +String getStringInput(String prompt)
-        +String getPasswordInput(String prompt)
-        +void displayMenu(String title, List~String~ options)
-    }
-
-    class Constants {
-        +static final String EMAIL_REGEX
-        +static final int MIN_PASSWORD_LENGTH
-        +static final int MAX_PASSWORD_LENGTH
-    }
-
-%% 애플리케이션 메인 클래스
-    class Application {
-        +static void main(String[] args)
-        -static void initializeDatabase()
-        -static void showWelcomeMessage()
-    }
-
-%% 관계 정의
-%% 모델 관계
-    User -- Email : sender
-    Email -- EmailLink : has
-    User -- EmailLink : receiver
-    EmailLink -- Trash : deleted
-
-%% DAO 관계
-    UserDao <|.. UserDaoImpl : implements
-    EmailDao <|.. EmailDaoImpl : implements
-    EmailLinkDao <|.. EmailLinkDaoImpl : implements
-    TrashDao <|.. TrashDaoImpl : implements
-
-%% 서비스 관계
-    UserService <|.. UserServiceImpl : implements
-    EmailService <|.. EmailServiceImpl : implements
-    InboxService <|.. InboxServiceImpl : implements
-    TrashService <|.. TrashServiceImpl : implements
-
-    UserServiceImpl --> UserDao : uses
-    EmailServiceImpl --> EmailDao : uses
-    EmailServiceImpl --> EmailLinkDao : uses
-    EmailServiceImpl --> UserDao : uses
-    InboxServiceImpl --> EmailDao : uses
-    InboxServiceImpl --> EmailLinkDao : uses
-    InboxServiceImpl --> UserDao : uses
-    InboxServiceImpl --> TrashDao : uses
-    TrashServiceImpl --> TrashDao : uses
-    TrashServiceImpl --> EmailLinkDao : uses
-    TrashServiceImpl --> EmailDao : uses
-    TrashServiceImpl --> UserDao : uses
-
-%% 뷰 관계
-    MenuView <|.. MainMenuView : implements
-    UserView <|.. LoginView : implements
-    UserView <|.. RegisterView : implements
-    UserView <|.. UserProfileView : implements
-    EmailView <|.. ComposeEmailView : implements
-    EmailView <|.. InboxView : implements
-    EmailView <|.. SearchEmailView : implements
-    EmailView <|.. SentEmailView : implements
-    TrashView <|.. TrashViewImpl : implements
-
-%% 뷰-서비스 관계
-    LoginView --> UserService : uses
-    RegisterView --> UserService : uses
-    UserProfileView --> UserService : uses
-    ComposeEmailView --> EmailService : uses
-    InboxView --> EmailService : uses
-    SearchEmailView --> EmailService : uses
-    SentEmailView --> InboxService : uses
-    TrashViewImpl --> TrashService : uses
-
-%% 유틸리티 관계
-    UserDaoImpl --> JDBCConnection : uses
-    EmailDaoImpl --> JDBCConnection : uses
-    EmailLinkDaoImpl --> JDBCConnection : uses
-    TrashDaoImpl --> JDBCConnection : uses
-
-    UserDaoImpl --> QueryUtil : uses
-    EmailDaoImpl --> QueryUtil : uses
-    EmailLinkDaoImpl --> QueryUtil : uses
-    TrashDaoImpl --> QueryUtil : uses
-
-    MainMenuView --> Session : uses
-    LoginView --> Session : uses
-    UserProfileView --> Session : uses
-    ComposeEmailView --> Session : uses
-    InboxView --> Session : uses
-    SearchEmailView --> Session : uses
-    SentEmailView --> Session : uses
-    TrashViewImpl --> Session : uses
-
-    MainMenuView --> ConsoleHelper : uses
-    LoginView --> ConsoleHelper : uses
-    RegisterView --> ConsoleHelper : uses
-    UserProfileView --> ConsoleHelper : uses
-    ComposeEmailView --> ConsoleHelper : uses
-    InboxView --> ConsoleHelper : uses
-    SearchEmailView --> ConsoleHelper : uses
-    SentEmailView --> ConsoleHelper : uses
-    TrashViewImpl --> ConsoleHelper : uses
-
-    UserServiceImpl --> Constants : uses
-    EmailDaoImpl --> Constants : uses
-    ComposeEmailView --> Constants : uses
-
-    Application --> MainMenuView : creates
-```
-
-### 시퀀스 다이어그램
+### 시퀀스 다이어그램(이메일 작성 및 전송 과정)
 ```mermaid
 sequenceDiagram
     participant User as 사용자
-    participant ViewImpl as 뷰 구현체
-    participant ViewInterface as 뷰 인터페이스
-    participant Service as 서비스 계층
-    participant DAO as DAO 계층
+    participant CV as ComposeViewImpl
+    participant ES as EmailServiceImpl
+    participant ED as EmailDaoImpl
+    participant ELD as EmailLinkDaoImpl
+    participant UD as UserDaoImpl
     participant DB as 데이터베이스
 
-%% 1. 회원가입 프로세스
-    User->>ViewImpl: 회원가입 요청
-    ViewImpl->>ViewInterface: 회원가입 처리 요청
-    ViewInterface->>Service: register(UserRegisterDto)
-    Service->>DAO: findByEmailId(email)
-    DAO->>DB: SELECT * FROM USER WHERE email_id = ?
-    DB-->>DAO: 결과 반환 (중복 검사)
-    Service->>Service: 입력값 유효성 검증
-    Service->>DAO: insert(User)
-    DAO->>DB: INSERT INTO USER (email_id, email_pwd, nickname, ...)
-    DB-->>DAO: 결과 반환
-    DAO-->>Service: 결과 반환
-    Service-->>ViewInterface: 등록 성공/실패 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 결과 표시
+    User->>CV: 1. 메일 작성 요청
+    CV->>CV: 메일 작성 화면 표시
+    User->>CV: 수신자, 제목, 내용 입력
+    CV->>ES: sendEmail(EmailComposeDto, senderId)
 
-%% 2. 로그인 프로세스
-    User->>ViewImpl: 로그인 요청
-    ViewImpl->>ViewInterface: 로그인 처리 요청
-    ViewInterface->>Service: login(UserLoginDto)
-    Service->>DAO: findByEmailId(email)
-    DAO->>DB: SELECT * FROM USER WHERE email_id = ?
-    DB-->>DAO: 사용자 정보 반환
-    DAO-->>Service: User 객체 반환
-    Service->>Service: 비밀번호 검증
-    Service-->>ViewInterface: 인증된 User 객체 또는 null 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl->>Session: setCurrentUser(user)
-    ViewImpl-->>User: 결과 표시 (성공 시 메인 메뉴로 이동)
-
-%% 3. 회원 정보 수정 프로세스
-    User->>ViewImpl: 프로필 수정 요청
-    ViewImpl->>ViewInterface: 프로필 수정 처리 요청
-    ViewInterface->>Service: updateProfile(UserProfileDto, userId)
-    Service->>Session: getUserId()
-    Service->>DAO: findById(userId)
-    DAO->>DB: SELECT * FROM USER WHERE idx = ?
-    DB-->>DAO: 사용자 정보 반환
-    DAO-->>Service: User 객체 반환
-    Service->>Service: 현재 비밀번호 확인 및 유효성 검사
-    Service->>DAO: update(User)
-    DAO->>DB: UPDATE USER SET nickname = ?, updated_at = ? WHERE idx = ?
-    DB-->>DAO: 결과 반환
-    DAO-->>Service: 결과 반환
-    Service-->>ViewInterface: 수정 성공/실패 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 결과 표시
-
-%% 4. 이메일 작성 프로세스
-    User->>ViewImpl: 이메일 작성 및 전송
-    ViewImpl->>ViewInterface: 이메일 전송 처리 요청
-    ViewInterface->>Service: sendEmail(EmailComposeDto, senderId)
-    Service->>Session: getUserId()
-    Service->>Service: 수신자 및 내용 유효성 검사
-    Service->>DAO: createEmail(Email)
-    DAO->>DB: INSERT INTO EMAIL (sender_id, title, body, status, created_at)
-    DB-->>DAO: 생성된 이메일 ID 반환
-
+    ES->>UD: 2. 수신자 유효성 검사
     loop 각 수신자에 대해
-        Service->>DAO: findUserByEmailId(receiverEmail)
-        DAO->>DB: SELECT * FROM USER WHERE email_id = ?
-        DB-->>DAO: 수신자 정보 반환
-        Service->>DAO: createEmailLink(emailId, receiverId)
-        DAO->>DB: INSERT INTO EMAIL_LINK (email_idx, receiver_id, is_readed, is_deleted)
-        DB-->>DAO: 결과 반환
+        ES->>UD: findByEmailId(receiverEmail)
+        UD->>DB: SELECT * FROM USER WHERE email_id = ?
+        DB-->>UD: 사용자 정보 반환
+        UD-->>ES: User 객체 또는 null 반환
     end
 
-    DAO-->>Service: 결과 반환
-    Service-->>ViewInterface: 전송 결과 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 전송 완료 메시지 표시
+    ES->>ES: 3. 유효한 수신자 확인
 
-%% 5. 받은 메일함 조회 프로세스
-    User->>ViewImpl: 받은 메일함 조회 요청
-    ViewImpl->>ViewInterface: 받은 메일함 조회 요청
-    ViewInterface->>Service: getReceivedEmails(userId)
-    Service->>Session: getUserId()
-    Service->>DAO: getLinksByReceiverId(userId)
-    DAO->>DB: SELECT * FROM EMAIL_LINK WHERE receiver_id = ? AND is_deleted = 'N'
-    DB-->>DAO: 이메일 링크 목록 반환
+    ES->>DB: 4. 트랜잭션 시작 (setAutoCommit(false))
 
-    loop 각 이메일 링크에 대해
-        DAO->>DB: SELECT * FROM EMAIL WHERE email_idx = ?
-        DB-->>DAO: 이메일 정보 반환
-        DAO->>DB: SELECT * FROM USER WHERE idx = ? (발신자 정보)
-        DB-->>DAO: 발신자 정보 반환
+    ES->>ED: 5. 이메일 저장
+    ED->>DB: INSERT INTO EMAIL(sender_id, title, body, status, created_at)
+    DB-->>ED: 생성된 이메일 ID 반환
+    ED-->>ES: emailId 반환
+
+    loop 6. 각 유효한 수신자에 대해
+        ES->>ELD: createEmailLink(emailId, receiverId)
+        ELD->>DB: INSERT INTO EMAIL_LINK(email_idx, receiver_id, is_readed, is_deleted)
+        DB-->>ELD: 결과 반환
+        ELD-->>ES: 생성 성공 여부 반환
     end
 
-    DAO-->>Service: 이메일 정보 목록 반환
-    Service->>Service: ReceivedEmailDto로 변환 및 정렬
-    Service-->>ViewInterface: ReceivedEmailDto 목록 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 받은 메일 목록 표시
+    ES->>DB: 7. 트랜잭션 커밋 (commit())
+    ES-->>CV: 8. 전송 결과 반환
+    CV-->>User: 9. 결과 메시지 표시
+```
 
-%% 6. 보낸 메일함 조회 프로세스
-    User->>ViewImpl: 보낸 메일함 조회 요청
-    ViewImpl->>ViewInterface: 보낸 메일함 조회 요청
-    ViewInterface->>Service: getSentEmails(userId)
-    Service->>Session: getUserId()
-    Service->>DAO: getEmailsBySenderId(userId)
-    DAO->>DB: SELECT * FROM EMAIL WHERE sender_id = ? ORDER BY created_at DESC
-    DB-->>DAO: 이메일 목록 반환
+### 시퀀스 다이어그램(받은 메일함을 조회하는 과정)
+```mermaid
+sequenceDiagram
+    participant User as 사용자
+    participant IV as InboxViewImpl
+    participant ES as EmailServiceImpl
+    participant ELD as EmailLinkDaoImpl
+    participant ED as EmailDaoImpl
+    participant UD as UserDaoImpl
+    participant DB as 데이터베이스
 
-    loop 각 이메일에 대해
-        DAO->>DB: SELECT * FROM EMAIL_LINK WHERE email_idx = ?
-        DB-->>DAO: 이메일 링크 목록 반환
-
-        loop 각 링크에 대해
-            DAO->>DB: SELECT * FROM USER WHERE idx = ? (수신자 정보)
-            DB-->>DAO: 수신자 정보 반환
-        end
+    User->>IV: 1. 받은 메일함 조회 요청
+    IV->>ES: getReceivedEmails(userId)
+    
+    ES->>ELD: 2. 수신자의 이메일 링크 조회
+    ELD->>DB: SELECT * FROM EMAIL_LINK WHERE receiver_id = ? AND is_deleted = 'N'
+    DB-->>ELD: 이메일 링크 목록 반환
+    ELD-->>ES: EmailLink 목록 반환
+    
+    loop 3. 각 이메일 링크에 대해
+        ES->>ED: getEmailById(emailIdx)
+        ED->>DB: SELECT * FROM EMAIL WHERE email_idx = ?
+        DB-->>ED: 이메일 정보 반환
+        ED-->>ES: Email 객체 반환
+        
+        ES->>UD: findById(senderId)
+        UD->>DB: SELECT * FROM USER WHERE idx = ?
+        DB-->>UD: 발신자 정보 반환
+        UD-->>ES: User 객체 반환
+        
+        ES->>ES: ReceivedEmailDto 생성 및 목록에 추가
     end
-
-    DAO-->>Service: 이메일 및 수신자 정보 반환
-    Service->>Service: SentEmailDto로 변환
-    Service-->>ViewInterface: SentEmailDto 목록 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 보낸 메일 목록 표시
-
-%% 7. 이메일 검색 프로세스
-    User->>ViewImpl: 이메일 검색 요청
-    ViewImpl->>ViewInterface: 이메일 검색 요청
-    ViewInterface->>Service: searchEmails(keyword, userId)
-    Service->>Session: getUserId()
-
-    Service->>DAO: searchInReceivedEmails(keyword, userId)
-    DAO->>DB: SELECT * FROM EMAIL_LINK el JOIN EMAIL e ON el.email_idx = e.email_idx WHERE el.receiver_id = ? AND (e.title LIKE ? OR e.body LIKE ?) AND el.is_deleted = 'N'
-    DB-->>DAO: 받은 이메일 검색 결과 반환
-
-    Service->>DAO: searchInSentEmails(keyword, userId)
-    DAO->>DB: SELECT * FROM EMAIL WHERE sender_id = ? AND (title LIKE ? OR body LIKE ?)
-    DB-->>DAO: 보낸 이메일 검색 결과 반환
-
-    DAO-->>Service: 검색 결과 반환
-    Service->>Service: EmailSearchDto로 변환 및 통합
-    Service-->>ViewInterface: EmailSearchDto 목록 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 검색 결과 표시
-
-%% 8. 이메일 삭제 프로세스
-    User->>ViewImpl: 받은 이메일 삭제 요청
-    ViewImpl->>ViewInterface: 이메일 삭제 요청
-    ViewInterface->>Service: deleteReceivedEmail(emailId, userId)
-    Service->>Session: getUserId()
-    Service->>DAO: getLinkByEmailIdAndReceiverId(emailId, userId)
-    DAO->>DB: SELECT * FROM EMAIL_LINK WHERE email_idx = ? AND receiver_id = ?
-    DB-->>DAO: 이메일 링크 반환
-
-    Service->>DAO: markAsDeleted(linkId)
-    DAO->>DB: UPDATE EMAIL_LINK SET is_deleted = 'Y' WHERE link_idx = ?
-    DB-->>DAO: 업데이트 결과 반환
-
-    Service->>DAO: createTrashItem(linkId)
-    DAO->>DB: INSERT INTO TRASH (link_id, deleted_at, expiration_date, is_restored)
-    DB-->>DAO: 생성 결과 반환
-
-    DAO-->>Service: 결과 반환
-    Service-->>ViewInterface: 삭제 결과 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 삭제 완료 메시지 표시
-
-%% 9. 휴지통 조회 프로세스
-    User->>ViewImpl: 휴지통 조회 요청
-    ViewImpl->>ViewInterface: 휴지통 조회 요청
-    ViewInterface->>Service: getTrashEmails(userId)
-    Service->>Session: getUserId()
-    Service->>DAO: getTrashItemsByUserId(userId)
-    DAO->>DB: SELECT * FROM TRASH t JOIN EMAIL_LINK el ON t.link_id = el.link_idx WHERE el.receiver_id = ? AND t.is_restored = 'N'
-    DB-->>DAO: 휴지통 항목 목록 반환
-
-    loop 각 휴지통 항목에 대해
-        DAO->>DB: SELECT * FROM EMAIL WHERE email_idx = el.email_idx
-        DB-->>DAO: 이메일 정보 반환
-        DAO->>DB: SELECT * FROM USER WHERE idx = e.sender_id
-        DB-->>DAO: 발신자 정보 반환
+    
+    ES->>ES: 4. 날짜 기준 내림차순 정렬
+    ES-->>IV: 5. ReceivedEmailDto 목록 반환
+    IV-->>User: 6. 받은 메일 목록 표시
+    
+    User->>IV: 7. 특정 이메일 상세 조회 요청
+    IV->>ES: getEmailDetails(emailId, userId)
+    
+    ES->>ED: 8. 이메일 정보 조회
+    ED->>DB: SELECT * FROM EMAIL WHERE email_idx = ?
+    DB-->>ED: 이메일 정보 반환
+    ED-->>ES: Email 객체 반환
+    
+    ES->>ELD: 9. 사용자의 이메일 링크 조회
+    ELD->>DB: SELECT * FROM EMAIL_LINK WHERE email_idx = ? AND receiver_id = ?
+    DB-->>ELD: 이메일 링크 정보 반환
+    ELD-->>ES: EmailLink 객체 반환
+    
+    alt 10. 이메일이 읽지 않은 상태인 경우
+        ES->>ELD: markAsRead(linkId)
+        ELD->>DB: UPDATE EMAIL_LINK SET is_readed = 'Y' WHERE link_idx = ?
+        DB-->>ELD: 업데이트 결과 반환
+        ELD-->>ES: 성공 여부 반환
     end
+    
+    ES->>UD: 11. 발신자 정보 조회
+    UD->>DB: SELECT * FROM USER WHERE idx = ?
+    DB-->>UD: 발신자 정보 반환
+    UD-->>ES: User 객체 반환
+    
+    ES->>ES: 12. ReceivedEmailDto 생성
+    ES-->>IV: 13. ReceivedEmailDto 반환
+    IV-->>User: 14. 이메일 상세 내용 표시
+```
 
-    DAO-->>Service: 휴지통 이메일 정보 반환
-    Service->>Service: TrashEmailDto로 변환
-    Service-->>ViewInterface: TrashEmailDto 목록 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 휴지통 이메일 목록 표시
+### 시퀀스 다이어그램(메일을 검색하는 과정)
+```mermaid
+sequenceDiagram
+    participant User as 사용자
+    participant SV as SearchViewImpl
+    participant ES as EmailServiceImpl
+    participant ED as EmailDaoImpl
+    participant ELD as EmailLinkDaoImpl
+    participant UD as UserDaoImpl
+    participant DB as 데이터베이스
 
-%% 10. 이메일 복구 프로세스
-    User->>ViewImpl: 이메일 복구 요청
-    ViewImpl->>ViewInterface: 이메일 복구 요청
-    ViewInterface->>Service: restoreEmail(trashId)
-    Service->>DAO: getTrashById(trashId)
-    DAO->>DB: SELECT * FROM TRASH WHERE trash_idx = ?
-    DB-->>DAO: 휴지통 항목 정보 반환
-
-    Service->>DAO: getLinkById(linkId)
-    DAO->>DB: SELECT * FROM EMAIL_LINK WHERE link_idx = ?
-    DB-->>DAO: 이메일 링크 정보 반환
-
-    Service->>DAO: restoreEmailLink(linkId)
-    DAO->>DB: UPDATE EMAIL_LINK SET is_deleted = 'N' WHERE link_idx = ?
-    DB-->>DAO: 업데이트 결과 반환
-
-    Service->>DAO: markTrashAsRestored(trashId)
-    DAO->>DB: UPDATE TRASH SET is_restored = 'Y' WHERE trash_idx = ?
-    DB-->>DAO: 업데이트 결과 반환
-
-    DAO-->>Service: 결과 반환
-    Service-->>ViewInterface: 복구 결과 반환
-    ViewInterface-->>ViewImpl: 결과 반환
-    ViewImpl-->>User: 복구 완료 메시지 표시
-
-%% 11. 로그아웃 프로세스
-    User->>ViewImpl: 로그아웃 요청
-    ViewImpl->>Session: logout()
-    Session->>Session: currentUser = null
-    ViewImpl-->>User: 로그인 화면으로 이동
+    User->>SV: 1. 메일 검색 요청
+    SV->>SV: 검색 화면 표시
+    User->>SV: 검색 키워드 입력
+    SV->>ES: searchReceivedEmails(keyword, userId)
+    
+    ES->>ED: 2. 수신 이메일 검색
+    ED->>DB: SELECT e.*, el.* FROM EMAIL e JOIN EMAIL_LINK el ON e.email_idx = el.email_idx WHERE el.receiver_id = ? AND (e.title LIKE ? OR e.body LIKE ?) AND el.is_deleted = 'N'
+    DB-->>ED: 검색 결과 반환
+    ED-->>ES: Email 목록 반환
+    
+    loop 3. 각 이메일에 대해
+        ES->>UD: findById(senderId)
+        UD->>DB: SELECT * FROM USER WHERE idx = ?
+        DB-->>UD: 발신자 정보 반환
+        UD-->>ES: User 객체 반환
+        
+        ES->>ELD: getLinksByReceiverId(userId)
+        ELD->>DB: SELECT * FROM EMAIL_LINK WHERE receiver_id = ? AND email_idx = ?
+        DB-->>ELD: 이메일 링크 정보 반환
+        ELD-->>ES: EmailLink 목록 반환
+        
+        ES->>ES: ReceivedEmailSearchDto 생성 및 목록에 추가
+    end
+    
+    ES->>ES: 4. 날짜 기준 내림차순 정렬
+    ES-->>SV: 5. 검색 결과 반환
+    SV-->>User: 6. 검색 결과 표시
+    
+    User->>SV: 7. 특정 검색 결과 선택
+    SV->>ES: getEmailDetails(emailId, userId)
+    
+    ES->>ED: 8. 이메일 정보 조회
+    ED->>DB: SELECT * FROM EMAIL WHERE email_idx = ?
+    DB-->>ED: 이메일 정보 반환
+    ED-->>ES: Email 객체 반환
+    
+    ES->>ELD: 9. 사용자의 이메일 링크 조회
+    ELD->>DB: SELECT * FROM EMAIL_LINK WHERE email_idx = ? AND receiver_id = ?
+    DB-->>ELD: 이메일 링크 정보 반환
+    ELD-->>ES: EmailLink 객체 반환
+    
+    ES->>UD: 10. 발신자 정보 조회
+    UD->>DB: SELECT * FROM USER WHERE idx = ?
+    DB-->>UD: 발신자 정보 반환
+    UD-->>ES: User 객체 반환
+    
+    ES->>ES: 11. ReceivedEmailDto 생성
+    ES-->>SV: 12. ReceivedEmailDto 반환
+    SV-->>User: 13. 선택한 이메일 상세 내용 표시
 ```
