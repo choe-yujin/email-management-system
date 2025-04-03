@@ -12,13 +12,13 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public class ComposeEmailViewImpl implements ComposeView {
+public class ComposeViewImpl implements ComposeView {
 
     private final Scanner scanner;
     private final ConsoleHelper consoleHelper;
     private final EmailService emailService;
 
-    public ComposeEmailViewImpl(Scanner scanner, ConsoleHelper consoleHelper, EmailService emailService) {
+    public ComposeViewImpl(Scanner scanner, ConsoleHelper consoleHelper, EmailService emailService) {
         this.scanner = scanner;
         this.consoleHelper = consoleHelper;
         this.emailService = emailService;
