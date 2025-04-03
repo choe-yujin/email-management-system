@@ -24,19 +24,10 @@ import java.util.Map;
 public interface EmailService {
     /**
      * 이메일 발송
-     * 
-     * 새로운 이메일을 작성하고 지정된 수신자들에게 발송합니다.
-     * 이메일 작성 화면에서 발송 버튼을 클릭할 때 호출됩니다.
-     * 
-     * 주요 처리 내용:
-     *   이메일 내용 유효성 검사
-     *   수신자 존재 여부 확인
-     *   이메일 데이터 저장
-     *   수신자별 이메일 링크 생성
-     * 
+     *
      * @param emailDto 이메일 작성 정보(수신자, 제목, 내용 등)
      * @param senderId 발신자 ID
-     * @return 발송 성공 여부(true: 성공, false: 실패)
+     * @return 결과 정보를 담은 Map(success: 성공 여부, message: 결과 메시지)
      */
     public Map<String, Object> sendEmail(EmailComposeDto emailDto, int senderId);
 
