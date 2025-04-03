@@ -109,7 +109,7 @@ public class SearchViewImpl implements SearchView {
         consoleHelper.displayDivider();
 
         // 이메일 선택 또는 뒤로 가기
-        int choice = consoleHelper.getIntInput("→ 조회할 메일 번호 입력 (0: 뒤로 가기): ", 0, results.size());
+        int choice = consoleHelper.getIntInput("조회할 메일 번호 입력 (0: 뒤로 가기): ", 0, results.size());
 
         if (choice > 0) {
             // 선택한 이메일 상세 정보 표시
