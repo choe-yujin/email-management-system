@@ -5,6 +5,7 @@ import com.metaverse.mail.dto.mail.ReceivedEmailDto;
 import com.metaverse.mail.dto.mail.EmailSearchDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 이메일 관련 비즈니스 로직을 정의하는 서비스 인터페이스
@@ -37,7 +38,7 @@ public interface EmailService {
      * @param senderId 발신자 ID
      * @return 발송 성공 여부(true: 성공, false: 실패)
      */
-    boolean sendEmail(EmailComposeDto emailDto, int senderId);
+    public Map<String, Object> sendEmail(EmailComposeDto emailDto, int senderId);
 
     /**
      * 받은 이메일 목록 조회
