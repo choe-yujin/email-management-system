@@ -35,26 +35,30 @@ public class EmailServiceImpl implements EmailService {
         this.emailLinkDao = emailLinkDao;
         this.userDao = userDao;
     }
+
     /**
      * 이메일 발송
      *
      * 새로운 이메일을 작성하고 지정된 수신자들에게 발송합니다.
      * 이메일 작성 화면에서 발송 버튼을 클릭할 때 호출됩니다.
      *
-     * 주요 처리 내용:
-     * 이메일 내용 유효성 검사
-     * 수신자 존재 여부 확인
-     * 이메일 데이터 저장
-     * 수신자별 이메일 링크 생성
+     * 버그 수정: 모든 수신자가 유효해야만 이메일을 전송하도록 수정
      *
      * @param emailDto 이메일 작성 정보(수신자, 제목, 내용 등)
      * @param senderId 발신자 ID
-     * @return 발송 성공 여부(true: 성공, false: 실패)
+     * @return 발송 성공 여부(true: 성공, false: 실패) 및 결과 메시지
      */
     @Override
-    public boolean sendEmail(EmailComposeDto emailDto, int senderId) {
+    public Map<String, Object> sendEmail(EmailComposeDto emailDto, int senderId) {
+        // 결과를 담을 Map 객체 생성
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", false);
+        result.put("message", "");
+
         // 1. 수신자 유효성 검사
         List<User> validReceivers = new ArrayList<>();
+        List<String> invalidReceivers = new ArrayList<>();
+
         for (String receiverEmail : emailDto.getReceiverEmails()) {
             User receiver = userDao.findByEmailId(receiverEmail);
 
@@ -62,17 +66,27 @@ public class EmailServiceImpl implements EmailService {
             if (receiver != null && receiver.getStatus() != 'D') {
                 validReceivers.add(receiver);
             } else {
-                System.out.println("→ 유효하지 않은 수신자: " + receiverEmail);
+                invalidReceivers.add(receiverEmail);
             }
         }
 
-        // 2. 유효한 수신자 확인
-        if (validReceivers.isEmpty()) {
-            System.out.println("→ 메일을 받을 수 있는 수신자가 없습니다.");
-            return false;
+        // 2. 유효하지 않은 수신자가 있는 경우 전송 실패로 처리
+        if (!invalidReceivers.isEmpty()) {
+            StringBuilder message = new StringBuilder("다음 수신자가 유효하지 않습니다: ");
+            message.append(String.join(", ", invalidReceivers));
+            message.append("\n메일 전송이 취소되었습니다.");
+
+            result.put("message", message.toString());
+            return result;
         }
 
-        // 3. 이메일 및 이메일 링크 생성 (기존 로직 동일)
+        // 3. 유효한 수신자가 없는 경우 전송 실패로 처리
+        if (validReceivers.isEmpty()) {
+            result.put("message", "메일을 받을 수 있는 수신자가 없습니다.");
+            return result;
+        }
+
+        // 4. 이메일 및 이메일 링크 생성
         Connection conn = null;
         try {
             conn = JDBCConnection.getConnection();
@@ -90,20 +104,24 @@ public class EmailServiceImpl implements EmailService {
             int emailId = emailDao.createEmail(email);
             if (emailId <= 0) {
                 conn.rollback();
-                return false;
+                result.put("message", "이메일 생성 중 오류가 발생했습니다.");
+                return result;
             }
 
-            // 유효한 수신자에게만 이메일 링크 생성
+            // 유효한 수신자에게 이메일 링크 생성
             for (User receiver : validReceivers) {
                 boolean linked = emailLinkDao.createEmailLink(emailId, receiver.getIdx());
                 if (!linked) {
                     conn.rollback();
-                    return false;
+                    result.put("message", "이메일 링크 생성 중 오류가 발생했습니다.");
+                    return result;
                 }
             }
 
             conn.commit();
-            return true;
+            result.put("success", true);
+            result.put("message", "메일 전송 완료! " + validReceivers.size() + "명의 수신자에게 메일을 보냈습니다.");
+            return result;
 
         } catch (SQLException e) {
             if (conn != null) {
@@ -114,7 +132,8 @@ public class EmailServiceImpl implements EmailService {
                 }
             }
             e.printStackTrace();
-            return false;
+            result.put("message", "데이터베이스 오류: " + e.getMessage());
+            return result;
         } finally {
             if (conn != null) {
                 try {
@@ -351,6 +370,7 @@ public class EmailServiceImpl implements EmailService {
         EmailComposeDto replyDto = new EmailComposeDto(receiverEmails, replyTitle, replyContent);
 
         // 답장 이메일 발송
-        return sendEmail(replyDto, senderId);
+        Map<String, Object> result = sendEmail(replyDto, senderId);
+        return (boolean) result.get("success");
     }
 }

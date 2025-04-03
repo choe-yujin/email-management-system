@@ -242,7 +242,7 @@ public class MainMenuViewImpl implements MainMenuView {
      * @return 메일 작성 화면 객체
      */
     private ComposeView createComposeView() {
-        return new ComposeViewImpl(scanner, emailService);
+        return new ComposeViewImpl(scanner, consoleHelper,emailService);
     }
 
     /**
