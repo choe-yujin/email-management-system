@@ -76,6 +76,7 @@ java -cp bin com.metaverse.mail.Application
 
 ## 개발 가이드
 - [Git 및 GitHub 사용 가이드](./GIT_GUIDE.md)
+- [프로젝트 소개 PPT](https://www.miricanvas.com/v/14fg3iq)
 
 ### 브랜치 전략
 
