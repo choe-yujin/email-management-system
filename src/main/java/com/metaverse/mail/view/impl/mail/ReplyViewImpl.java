@@ -51,7 +51,7 @@ public class ReplyViewImpl implements ReplyView {
         consoleHelper.displayHeader("✉️ 답장 작성");
 
         // 원본 이메일 정보 표시
-        System.out.println("(받는 사람 이메일): " + originalEmail.getSenderEmail());
+        System.out.println("받는 사람 이메일: " + originalEmail.getSenderEmail());
         System.out.println("제목: Re: " + originalEmail.getTitle());
 
         // 내용 입력 받기
